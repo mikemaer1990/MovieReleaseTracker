@@ -1,3 +1,3 @@
-from app import append
+from app import app
 
 app.run()
