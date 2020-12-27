@@ -1,6 +1,7 @@
 import os
 import configuration
 import re
+import time
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -8,6 +9,8 @@ from flask import flash, g, redirect, render_template, request, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from api import lookup, lookupById
 from utilities import login_required
+from emailer import send_release_mail
+from datetime import datetime
 
 # define our flask app
 app = Flask(__name__)
@@ -16,9 +19,9 @@ app = Flask(__name__)
 app.config['SECRET_KEY']=configuration.SECRET_KEY_STORAGE
 
 # used to switch DB
-ENV = 'launch'
+ENV = 'dev'
 if ENV == 'dev':
-    app.config['SQLALCHEMY_DATABASE_URI']=conifguration.DATABASE_URL
+    app.config['SQLALCHEMY_DATABASE_URI']=configuration.DATABASE_URL
 else:
     app.config['SQLALCHEMY_DATABASE_URI']=os.environ.get('DATABASE_URL')
 # gets rid of annoying error message
@@ -171,6 +174,12 @@ def register():
     # if get then render tamplate  
     return render_template('auth/register.html')
 
+@app.route('/schedule')
+def schedule():
+    if request.method == 'GET':
+        check_db()
+        return render_template('search/schedule.html')
+
 # login route
 @app.route('/auth/login', methods=('POST', 'GET'))
 def login():
@@ -204,7 +213,6 @@ def login():
 @app.route('/user/follows', methods=('GET', 'POST'))
 @login_required
 def follows():
-    # couldn't get login_required to work - so using this for now
     if request.method == 'GET':
         follows = db.session.query(Follows.movie_id).filter(Follows.user_id == session['user_id']).all()
         followList = []
@@ -259,9 +267,9 @@ def logout():
     session.clear()
     return redirect(url_for('index'))
 
-@app.before_first_request
-def init_request():
-    db.create_all()
+# @app.before_first_request
+# def init_request():
+#     db.create_all()
 
 @app.before_request
 def load_logged_in_user():
@@ -272,5 +280,24 @@ def load_logged_in_user():
         user = User.query.filter_by(id=user_id).all()
         g.user=user[0]
 
+def check_db(): 
+    today = datetime.now().date()
+    mk = '2021-04-15'
+    releases = db.session.query(Follows).filter(Follows.movie_date == mk).all()
+
+    if releases is None or releases == []:
+        pass
+    else:
+        for release in releases:
+            date_obj = datetime.strptime(release.movie_date, '%Y-%m-%d')
+            release_date = date_obj.strftime('%B %d, %Y')
+            to_email = User.query.filter_by(id = release.user_id).first().username
+            movie_title = release.movie_title
+            try:
+                send_release_mail(to_email, release_date, movie_title)
+            except:
+                print('Email Error')
+
+# testing run
 # if __name__ == '__main__':
 #     app.run()
