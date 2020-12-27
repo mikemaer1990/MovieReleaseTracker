@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block header %}
+<h1 class="text-center">{% block title %}Your Follows{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+
+<div id="followsContainer">
+  <table id="followsTable" class="table table-bordered table-responsive-sm mt-5">
+    <thead class="thead-lightish">
+      <tr class="d-flex">
+        <th class="col-md-4">Title</th>
+        <th class="col-md-4">Release</th>
+        <th class="col-md-2 text-center">Details</th>
+        <th class="col-md-2 text-center">Delete</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      {% if not follows %}
+      <tr class="d-flex">
+        <td class="col-12">Nothing to see here...</td>
+      </tr>
+      {% else %}
+        {% for movie in follows %}
+        {% if movie['released'] == True %}
+          <tr class="d-flex bg-released">
+        {% else %}
+          <tr class="d-flex bg-unreleased">
+        {%endif%}
+        <td class="col-md-4">{{movie['name']}}</td>
+        <td class="col-md-4">{{movie['release']}}</td>
+        <td class="col-md-2 text-center"><a href="{{ url_for('details', id=movie['id']) }}"><button type="button"
+              id="details_button" class="btn btn-success mb-1">Details</button></a>
+        <td class="text-center col-md-2">
+          <form method="post"><button id="details_button" type="submit" name="movie_id" value="{{movie['id']}}" class="btn btn-danger"><img
+                id="trash_svg" src="../../static/trash.svg"></button></form>
+        </td>
+        </tr>
+        {% endfor %}
+      {%endif%}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
