@@ -4,9 +4,11 @@ import configuration
 from flask import request
 from datetime import datetime
 
+# function to lookup movie in API via name string
 def lookup(movie):
     # Contact API
     try:
+        # retrieve api_key
         api_key = configuration.API_KEY_STORAGE
         response = requests.get(f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&language=en-US&query={movie}&page=1&include_adult=true")
         response.raise_for_status()
@@ -14,9 +16,12 @@ def lookup(movie):
         return None
         # Parse response
     try:
+        # jsonify response
         movies = response.json()
+        # initialize result list
         results = []
         search = movies['results']
+        # for each result - store their data in a new list
         for result in search:
             cover = result["poster_path"]
             # parse release date info
@@ -38,10 +43,10 @@ def lookup(movie):
     finally:
         return results
 
-
+# function to lookup movies by id
 def lookupById(id):
-    # Contact API
     try:
+        # retrieve api_key
         api_key = configuration.API_KEY_STORAGE
         response = requests.get(f"https://api.themoviedb.org/3/movie/{id}?api_key={api_key}&language=en-US")    
         response.raise_for_status()
@@ -49,10 +54,12 @@ def lookupById(id):
         return None
         # Parse response
     try:
+        # jsonify response
         movies = response.json()
+        # initialize result list
         results = []
+        # pre-set cover to be used in f string
         cover = movies["poster_path"]
-        
         # parse release date info
         date_obj = datetime.strptime(movies["release_date"], '%Y-%m-%d')
         release_date = date_obj.strftime('%B %d, %Y')

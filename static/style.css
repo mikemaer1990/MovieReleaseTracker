@@ -272,6 +272,12 @@ svg:hover #flap {
     }
 }
 
+@media only screen and (max-height: 780px) {
+    #movie_cover {
+        height: 50vh;
+    }
+}
+
 @media only screen and (max-width: 900px) {
     #movieDetailsContainer {
         width: 55%;

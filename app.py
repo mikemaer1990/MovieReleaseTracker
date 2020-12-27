@@ -211,12 +211,14 @@ def login():
 
 # follows route to display users followed movies
 @app.route('/user/follows', methods=('GET', 'POST'))
+# ensure user is logged in
 @login_required
 def follows():
+    # grab users follows from the database and arrange them in order by release date
     if request.method == 'GET':
-        follows = db.session.query(Follows.movie_id).filter(Follows.user_id == session['user_id']).all()
+        follows = db.session.query(Follows.movie_id).filter(Follows.user_id == session['user_id']).order_by(Follows.movie_date.desc()).all()
         followList = []
-
+        # create a list of all users follows to display in the template
         for i in range(len(follows)):
             movie_id = lookupById(follows[i].movie_id)[0]
             followList.append({
@@ -227,21 +229,21 @@ def follows():
                 "rating": movie_id["rating"],
                 "released": movie_id["released"]
             })
-        
+        # render the template and fill it in with the retrieved info
         return render_template('user/follows.html', follows = followList)
+    # if they choose to delete a follow - delete it from their follows
     elif request.method == 'POST':
+        # get the movie id from the form (delete button value)
         id = request.form['movie_id']
+        # store their session id
         user = g.user.id
-
+        # deletion query
         delete_this = db.session.query(Follows).filter(Follows.movie_id == id, Follows.user_id==user).one()
-        
+        # delete the entry and commit it
         db.session.delete(delete_this)
         db.session.commit()
-        # print(delete_this[0].movie_title)
-
-
-        follows = db.session.query(Follows.movie_id).filter(Follows.user_id == session['user_id']).all()
-
+        # create an updated follows list
+        follows = db.session.query(Follows.movie_id).filter(Follows.user_id == session['user_id']).order_by(Follows.movie_date.desc()).all()
         followList = []
 
         for i in range(len(follows)):
@@ -254,23 +256,10 @@ def follows():
                 "rating": movie_id["rating"],
                 "released": movie_id["released"]
             })
-        
+        # render the updated template after deletion
         return render_template('user/follows.html', follows = followList)
-    else:
-        flash('Please Log In')
-        return redirect(url_for('login'))
 
-# logout route
-@app.route('/logout')
-def logout():
-    g.user = None
-    session.clear()
-    return redirect(url_for('index'))
-
-# @app.before_first_request
-# def init_request():
-#     db.create_all()
-
+# this will store the users id in a global variable accessible anywhere
 @app.before_request
 def load_logged_in_user():
     user_id = session.get('user_id')
@@ -280,21 +269,38 @@ def load_logged_in_user():
         user = User.query.filter_by(id=user_id).all()
         g.user=user[0]
 
-def check_db(): 
-    today = datetime.now().date()
-    mk = '2021-04-15'
-    releases = db.session.query(Follows).filter(Follows.movie_date == mk).all()
+# logout route
+@app.route('/logout')
+def logout():
+    g.user = None
+    session.clear()
+    return redirect(url_for('index'))
 
+# function to go over database and find any movie that releases on 'todays' date
+def check_db(): 
+    # store todays date value
+    today = datetime.now().date()
+    # TESTING
+    mk = '2021-04-15'
+    # grab all releases from follows table that have a movie_date value that matches todays date
+    releases = db.session.query(Follows).filter(Follows.movie_date == mk).all()
+    # if none found do nothing
     if releases is None or releases == []:
         pass
+    # else send emails to users following a movie that releases today
     else:
         for release in releases:
+            # date format
             date_obj = datetime.strptime(release.movie_date, '%Y-%m-%d')
             release_date = date_obj.strftime('%B %d, %Y')
+            # get the users email for each release
             to_email = User.query.filter_by(id = release.user_id).first().username
+            # as well as the movie title
             movie_title = release.movie_title
+            # send the email
             try:
                 send_release_mail(to_email, release_date, movie_title)
+            # if a failure occurs - print an error
             except:
                 print('Email Error')
 
