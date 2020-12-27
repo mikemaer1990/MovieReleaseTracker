@@ -272,5 +272,5 @@ def load_logged_in_user():
         user = User.query.filter_by(id=user_id).all()
         g.user=user[0]
 
-if __name__ == '__main__':
-    app.run()
+# if __name__ == '__main__':
+#     app.run()
