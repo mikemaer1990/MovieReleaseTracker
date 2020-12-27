@@ -19,7 +19,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY']=configuration.SECRET_KEY_STORAGE
 
 # used to switch DB
-ENV = 'dev'
+ENV = 'launch'
 if ENV == 'dev':
     app.config['SQLALCHEMY_DATABASE_URI']=configuration.DATABASE_URL
 else:
