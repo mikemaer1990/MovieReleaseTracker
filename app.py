@@ -16,9 +16,9 @@ app = Flask(__name__)
 app.config['SECRET_KEY']=configuration.SECRET_KEY_STORAGE
 
 # used to switch DB
-ENV = 'dev'
+ENV = 'launch'
 if ENV == 'dev':
-    app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:Cuntfuck123@localhost'
+    app.config['SQLALCHEMY_DATABASE_URI']=conifguration.DATABASE_URL
 else:
     app.config['SQLALCHEMY_DATABASE_URI']=os.environ.get('DATABASE_URL')
 # gets rid of annoying error message
