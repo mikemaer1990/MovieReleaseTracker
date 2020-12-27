@@ -104,7 +104,7 @@ def results(query):
             return render_template('search/results.html', results=searchQuery)
         # flash error message
         flash(error)
-
+    return render_template('search/results.html', results=searchQuery)
 # details route to show movie info and imdb link / takes one arguement (id of the movie)
 @app.route('/<int:id>/details', methods=('GET', 'POST'))
 def details(id):
