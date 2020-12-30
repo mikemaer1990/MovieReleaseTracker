@@ -97,8 +97,8 @@ form a {
 
 #movieContainer:hover {
     transform: scale(1.1);
-    -webkit-animation: shadow_in 1s ease;
-    animation: shadow_in 1s ease;
+    -webkit-animation: shadow_in 1s ease-in-out;
+    animation: shadow_in 1s ease-in-out;
     -webkit-animation-fill-mode: forwards;
     animation-fill-mode: forwards;
 }
