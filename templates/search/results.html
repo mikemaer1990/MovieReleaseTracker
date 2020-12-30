@@ -5,10 +5,11 @@
 {% endblock %}
 
 {% block content %}
-<a href="{{ url_for('details', id=item['id']) }}">
+
 <div class="resultsContainer mt-5 no-gutters p-md-5 p-sm-2">
     <div class="row no-gutters justify-content-around">
         {% for item in results %}
+        <a href="{{ url_for('details', id=item['id']) }}">
         <div id="movieContainer" class="text-center col col-xl-2 col-lg-3 col-md-4 col-sm-5 col-12 mb-5 m-1 p">
             <p>{{item['name']}} ({{item['release']}})</p>
             {% if item['cover'] == 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None' %}
