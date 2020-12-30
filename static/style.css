@@ -90,8 +90,8 @@ form a {
     border: 2px solid;
     border-radius: 9.5px;
     box-shadow: 10px 10px 5px #888888;
-    -webkit-animation: shadow_out 1s ease;
-    animation: shadow_out 1s ease;
+    -webkit-animation: shadow_out 1s ease-in-out;
+    animation: shadow_out 1s ease-in-out;
     transition: transform 0.8s;
 }
 
