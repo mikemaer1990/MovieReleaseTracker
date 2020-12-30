@@ -23,6 +23,7 @@
             {% else %}
             <p>Rating: {{item['rating']}}</p>
             {% endif %}
+            </a>
             <form method="post">
                 <div class="btn-group">
                     {% if g.user %}
@@ -37,7 +38,6 @@
                 </div>
             </form>
         </div>
-    </a>
         {% endfor %}
     </div>
 </div>
