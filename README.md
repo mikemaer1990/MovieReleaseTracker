@@ -15,3 +15,5 @@ I did have all of my modules separated properly, and was using an SQLite databas
 2. Enable Multiple Results Pages
 3. Upcoming Releases Page
 4. More Data on Details Page
+5. Search bar in the navbar! --- PRIORITY
+6. Option to have emails at different times - week before, etc.
