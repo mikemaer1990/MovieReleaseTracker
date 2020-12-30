@@ -89,7 +89,7 @@ form a {
 #movieContainer {
     border: 2px solid;
     border-radius: 9.5px;
-    box-shadow: 5px 5px 5px 5px #888888;
+    box-shadow: 10px 10px 5px #888888;
     -webkit-animation: shadow_out 1s ease;
     animation: shadow_out 1s ease;
     transition: transform 0.8s;
@@ -221,7 +221,7 @@ svg:hover #flap {
 
 @-webkit-keyframes shadow_in {
     from {
-        box-shadow: 5px 5px 5px 5px #888888;
+        box-shadow: 10px 10px 5px #888888;
     }
 
     to {
@@ -231,7 +231,7 @@ svg:hover #flap {
 
 @keyframes shadow_in {
     from {
-        box-shadow: 5px 5px 5px 5px #888888;
+        box-shadow: 10px 10px 5px #888888;
     }
 
     to {
@@ -246,7 +246,7 @@ svg:hover #flap {
     }
 
     to {
-        box-shadow: 5px 5px 5px 5px #888888;
+        box-shadow: 10px 10px 5px #888888;
     }
 }
 
@@ -257,7 +257,7 @@ svg:hover #flap {
     }
 
     to {
-        box-shadow: 5px 5px 5px 5px #888888;
+        box-shadow: 10px 10px 5px #888888;
     }
 }
 
