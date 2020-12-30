@@ -105,6 +105,7 @@ def results(query):
         # flash error message
         flash(error)
     return render_template('search/results.html', results=searchQuery)
+    
 # details route to show movie info and imdb link / takes one arguement (id of the movie)
 @app.route('/<int:id>/details', methods=('GET', 'POST'))
 def details(id):
@@ -280,10 +281,8 @@ def logout():
 def check_db(): 
     # store todays date value
     today = datetime.now().date()
-    # TESTING
-    mk = '2021-04-15'
     # grab all releases from follows table that have a movie_date value that matches todays date
-    releases = db.session.query(Follows).filter(Follows.movie_date == mk).all()
+    releases = db.session.query(Follows).filter(Follows.movie_date == today).all()
     # if none found do nothing
     if releases is None or releases == []:
         pass
