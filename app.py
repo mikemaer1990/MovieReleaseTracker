@@ -76,13 +76,19 @@ def index():
     return render_template('dashboard/index.html')
 
 # results route - takes one argument which is the query string
-@app.route('/results/<query>', methods=('GET', 'POST'))
-def results(query):
+@app.route('/results', methods=('GET', 'POST'))
+def results():
+    query = request.args.get('query')
     # use our api to get results based on query string
     searchQuery = lookup(query)
     # render template with results
     if request.method == 'GET':
-        return render_template('search/results.html', results=searchQuery)
+        if searchQuery == []:
+            error = 'Please refine your search query to be more specific'
+        else:
+            return render_template('search/results.html', results=searchQuery)
+        flash(error)
+        return redirect(url_for('index'))
     # if user clicks the follow button
     elif request.method == 'POST':
         # get the movie id from the form and look it up in our api

@@ -678,15 +678,13 @@
     </svg>
 
   </a>
+
   <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse" data-target="#collapsibleNavId"
     aria-controls="collapsibleNavId" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
   <div class="collapse navbar-collapse" id="collapsibleNavId">
     <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('index') }}">Search</a>
-      </li>
       {% if g.user %}
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('follows') }}">Your Follows</a>
@@ -694,6 +692,17 @@
       {% endif %}
     </ul>
     <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+      <form class="d-flex mr-3" action="/results" method="get">
+        <div class="input-group mb-3 mt-1">
+          <div class="input-group-prepend">
+            <button type="submit" id="" class="btn btn-dark">Search</button>
+          </div>
+          <input class="col-sm-12 form-control" type="text" placeholder="Search" aria-label="Search" name="query" required>
+        </div>
+      </form>
+
+
+
       {% if g.user %}
       <li class="nav-item mx-3 mb-2"><span class="text-capitalize">{{ g.user.username }}</span>
       <li class="nav-item mr-2 text-primary"><a href="{{ url_for('logout') }}">Log Out</a>

@@ -33,6 +33,12 @@ form a {
     text-align: center;
 }
 
+input[type="text"]:focus {
+    border-color: #23272b;
+    box-shadow: 0 1px 1px white inset, 0 0 8px #23272b;
+    outline: 0 none;
+}
+
 #search_container {
     position: fixed;
     top: 50%;
@@ -52,7 +58,7 @@ form a {
 }
 
 #resultsContainer {
-    width: 75%;
+    width: 90%;
     display: flex;
     align-items: center;
     justify-content: center;
