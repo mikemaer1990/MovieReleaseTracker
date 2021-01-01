@@ -14,6 +14,12 @@
     <span class="input-group-text bg-dark text-light" id="inputGroup-sizing-default"><img src="../../static/password.svg"></span>
     <input type="password" name="password" id="password" class="form-control" placeholder="Please enter your password"required>
   </div>
-  <input class="btn btn-md btn-dark" type="submit" value="Login">
+  <div class="btn-group">
+    <button class="btn btn-md btn-dark" disabled>Forgot?</button>
+    <input class="btn btn-md btn-dark" type="submit" value="Login"></button>
+    <a class="btn btn-md btn-dark" href="{{ url_for('register') }}">Register</a>
+  </div>
+
+
 </form>
 {% endblock %}

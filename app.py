@@ -178,7 +178,7 @@ def register():
             return redirect(url_for('login'))
         # flash any errors
         flash(error)
-    # if get then render tamplate  
+    # if get then render template  
     return render_template('auth/register.html')
 
 @app.route('/schedule')
