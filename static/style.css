@@ -39,6 +39,9 @@ input[type="text"]:focus {
     outline: 0 none;
 }
 
+#followsTable {
+    margin-bottom: 5rem;
+}
 #search_container {
     position: fixed;
     top: 50%;
