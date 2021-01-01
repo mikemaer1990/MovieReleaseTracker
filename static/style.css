@@ -307,6 +307,9 @@ svg:hover #flap {
 @media only screen and (max-width: 730px) {
     #search_container {
         width: 90%;
+        position: relative;
+        margin-top: 65%;
+        margin-right: 50%;
     }
 }
 

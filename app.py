@@ -115,9 +115,9 @@ def results():
 # details route to show movie info and imdb link / takes one arguement (id of the movie)
 @app.route('/<int:id>/details', methods=('GET', 'POST'))
 def details(id):
+    movie = lookupById(id)
     # if get - then get api information and pass that to the template
     if request.method == 'GET':
-        movie = lookupById(id)
         return render_template('search/details.html', details=movie)
     # else if they click the follow button
     elif request.method == 'POST':
@@ -135,8 +135,8 @@ def details(id):
             flash('Now following {}!'.format(movie['name']))
             return redirect(url_for('follows'))
         # flash any error message
-        flash(error)
-
+    flash(error)
+    return redirect(url_for('follows'))
 # register route
 @app.route('/auth/register', methods=('GET', 'POST'))
 def register():
