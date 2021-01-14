@@ -17,14 +17,14 @@ from datetime import datetime
 app = Flask(__name__)
 
 # setting up config
-app.config['SECRET_KEY']=configuration.SECRET_KEY_STORAGE
+app.config['SECRET_KEY'] = configuration.SECRET_KEY_STORAGE
 
 # used to switch DB
 ENV = 'launch'
 if ENV == 'dev':
-    app.config['SQLALCHEMY_DATABASE_URI']=configuration.DATABASE_URL
+    app.config['SQLALCHEMY_DATABASE_URI'] = configuration.DATABASE_URL
 else:
-    app.config['SQLALCHEMY_DATABASE_URI']=os.environ.get('DATABASE_URL')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 # gets rid of annoying error message
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -32,6 +32,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # our database models
+
+
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -41,7 +43,7 @@ class User(db.Model):
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(app.config['SECRET_KEY'], expires_sec)
         return s.dumps({'user_id': self.id}).decode('utf8')
-    
+
     @staticmethod
     def verify_reset_token(token):
         s = Serializer(app.config['SECRET_KEY'])
@@ -55,14 +57,15 @@ class User(db.Model):
         self.username = username
         self.password = password
 
+
 class Follows(db.Model):
     __tablename__ = 'follows'
     follow_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
     movie_id = db.Column(db.Integer)
     movie_title = db.Column(db.String)
-    movie_date= db.Column(db.Text())
-    
+    movie_date = db.Column(db.Text())
+
     def __init__(self, user_id, movie_id, movie_title, movie_date):
         self.user_id = user_id
         self.movie_id = movie_id
@@ -70,6 +73,8 @@ class Follows(db.Model):
         self.movie_date = movie_date
 
 # main page route
+
+
 @app.route('/', methods=('GET', 'POST'))
 def index():
     # acquire the movie title from form and pass it to the results page
@@ -82,14 +87,16 @@ def index():
         elif lookup(query) == []:
             error = 'Please refine your search query to be more specific'
         # if valid and results are found - redirect to results page - passing the query
-        else: 
-            return redirect(url_for('results', query=query)) 
+        else:
+            return redirect(url_for('results', query=query))
         # flash error
         flash(error)
     # get request will display index
     return render_template('dashboard/index.html')
 
 # results route - takes one argument which is the query string
+
+
 @app.route('/results', methods=('GET', 'POST'))
 def results():
     query = request.args.get('query')
@@ -123,7 +130,8 @@ def results():
             error = 'You are already following {}!'.format(movie['name'])
         # if not following then insert the follow into the database
         else:
-            insert_follow = Follows(session['user_id'], movie['id'], movie['name'], release_date)
+            insert_follow = Follows(
+                session['user_id'], movie['id'], movie['name'], release_date)
             db.session.add(insert_follow)
             db.session.commit()
             # flask success message and re-render template
@@ -132,8 +140,10 @@ def results():
         # flash error message
         flash(error)
     return render_template('search/results.html', results=searchQuery)
-    
+
 # details route to show movie info and imdb link / takes one arguement (id of the movie)
+
+
 @app.route('/<int:id>/details', methods=('GET', 'POST'))
 def details(id):
     movie = lookupById(id)
@@ -160,7 +170,8 @@ def details(id):
             error = 'You are already following {}!'.format(movie['name'])
         else:
             # if not following then insert the follow into the database
-            insert_follow = Follows(g.user.id, movie['id'], movie['name'], release_date)
+            insert_follow = Follows(
+                g.user.id, movie['id'], movie['name'], release_date)
             db.session.add(insert_follow)
             db.session.commit()
             # success message and reload new follows page
@@ -170,6 +181,7 @@ def details(id):
     flash(error)
     return redirect(url_for('follows'))
 
+
 @app.route('/schedule')
 def schedule():
     if request.method == 'GET':
@@ -177,6 +189,8 @@ def schedule():
         return render_template('search/schedule.html')
 
 # register route
+
+
 @app.route('/auth/register', methods=('GET', 'POST'))
 def register():
     # on post - retrieve info from our form
@@ -217,10 +231,12 @@ def register():
             return redirect(url_for('login'))
         # flash any errors
         flash(error)
-    # if get then render template  
+    # if get then render template
     return render_template('auth/register.html')
 
 # login route
+
+
 @app.route('/auth/login', methods=('POST', 'GET'))
 def login():
     if request.method == 'POST':
@@ -230,7 +246,7 @@ def login():
         error = None
 
         # check for user in database and pull their info if it exists
-        user = User.query.filter_by(username = username).first()
+        user = User.query.filter_by(username=username).first()
         # if valid input and user exists - set our session data
         if user and check_password_hash(user.password, password) == True:
             session.clear()
@@ -252,13 +268,16 @@ def login():
     return render_template('auth/login.html')
 
 # follows route to display users followed movies
+
+
 @app.route('/user/follows', methods=('GET', 'POST'))
 # ensure user is logged in
 @login_required
 def follows():
     # grab users follows from the database and arrange them in order by release date
     if request.method == 'GET':
-        follows = db.session.query(Follows).filter(Follows.user_id == session['user_id']).order_by(Follows.movie_date.desc()).all()
+        follows = db.session.query(Follows).filter(
+            Follows.user_id == session['user_id']).order_by(Follows.movie_date.desc()).all()
         followList = []
         # create a list of all users follows to display in the template
         for i in range(len(follows)):
@@ -274,12 +293,12 @@ def follows():
                 "name": movie_id["name"],
                 "id": movie_id["id"],
                 "release": release_date,
-                "cover" : movie_id["cover"],
+                "cover": movie_id["cover"],
                 "rating": movie_id["rating"],
                 "released": movie_id["released"]
             })
         # render the template and fill it in with the retrieved info
-        return render_template('user/follows.html', follows = followList)
+        return render_template('user/follows.html', follows=followList)
     # if they choose to delete a follow - delete it from their follows
     elif request.method == 'POST':
         # get the movie id from the form (delete button value)
@@ -287,14 +306,16 @@ def follows():
         # store their session id
         user = g.user.id
         # deletion query
-        delete_this = db.session.query(Follows).filter(Follows.movie_id == id, Follows.user_id==user).one()
+        delete_this = db.session.query(Follows).filter(
+            Follows.movie_id == id, Follows.user_id == user).one()
         # delete the entry and commit it
         db.session.delete(delete_this)
         db.session.commit()
         # create an updated follows list
-        follows = db.session.query(Follows.movie_id).filter(Follows.user_id == session['user_id']).order_by(Follows.movie_date.desc()).all()
+        follows = db.session.query(Follows.movie_id).filter(
+            Follows.user_id == session['user_id']).order_by(Follows.movie_date.desc()).all()
         followList = []
-        
+
         for i in range(len(follows)):
             movie_id = lookupById(follows[i].movie_id)[0]
             release = lookupReleaseDate(movie_id['id'])
@@ -306,14 +327,16 @@ def follows():
                 "name": movie_id["name"],
                 "id": movie_id["id"],
                 "release": release_date,
-                "cover" : movie_id["cover"],
+                "cover": movie_id["cover"],
                 "rating": movie_id["rating"],
                 "released": movie_id["released"]
             })
         # render the updated template after deletion
-        return render_template('user/follows.html', follows = followList)
+        return render_template('user/follows.html', follows=followList)
 
 # this will store the users id in a global variable accessible anywhere
+
+
 @app.before_request
 def load_logged_in_user():
     user_id = session.get('user_id')
@@ -321,9 +344,11 @@ def load_logged_in_user():
         g.user = None
     else:
         user = User.query.filter_by(id=user_id).all()
-        g.user=user[0]
+        g.user = user[0]
 
 # logout route
+
+
 @app.route('/logout')
 def logout():
     g.user = None
@@ -331,11 +356,14 @@ def logout():
     return redirect(url_for('index'))
 
 # function to go over database and find any movie that releases on 'todays' date
-def check_db(): 
+
+
+def check_db():
     # store todays date value
-    today = datetime.now().date()
+    today = str(datetime.now().date())
     # grab all releases from follows table that have a movie_date value that matches todays date
-    releases = db.session.query(Follows).filter(Follows.movie_date == today).all()
+    releases = db.session.query(Follows).filter(
+        Follows.movie_date == today).all()
     # if none found do nothing
     if releases is None or releases == []:
         pass
@@ -346,7 +374,8 @@ def check_db():
             date_obj = datetime.strptime(release.movie_date, '%Y-%m-%d')
             release_date = date_obj.strftime('%B %d, %Y')
             # get the users email for each release
-            to_email = User.query.filter_by(id = release.user_id).first().username
+            to_email = User.query.filter_by(
+                id=release.user_id).first().username
             # as well as the movie title
             movie_title = release.movie_title
             # send the email
@@ -356,7 +385,8 @@ def check_db():
             except:
                 print('Email Error')
 
-@app.route('/auth/forgot' , methods=('GET', 'POST'))
+
+@app.route('/auth/forgot', methods=('GET', 'POST'))
 def forgot():
     if request.method == 'GET':
         return render_template('auth/forgot.html')
@@ -373,6 +403,7 @@ def forgot():
             return redirect(url_for('login'))
         flash(error)
     return render_template('auth/forgot.html')
+
 
 @app.route('/auth/reset/<token>', methods=('GET', 'POST'))
 def reset(token):
@@ -413,7 +444,7 @@ def reset(token):
             return redirect(url_for('login'))
         # flash any errors
         flash(error)
-    # if get then render template  
+    # if get then render template
     return render_template('auth/reset.html')
 # testing run
 # if __name__ == '__main__':
