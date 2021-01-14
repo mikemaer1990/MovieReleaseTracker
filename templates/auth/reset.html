@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1 class="text-center">{% block title %}Reset Password{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<form id="search_container" method="post">
+    <div class="input-group mb-3 mb-1 px-2 py-1 mt-2">
+        <span class="input-group-text bg-dark text-light" id="inputGroup-sizing-default"><img
+                src="../../static/password.svg"></span>
+        <input type="password" name="password" id="password" class="form-control"
+            placeholder="Please enter your new password" required>
+    </div>
+    <div class="input-group mb-3 mb-1 px-2 py-1 mt-2">
+        <span class="input-group-text bg-dark text-light" id="inputGroup-sizing-default"><img
+                src="../../static/confirm.svg"></span>
+        <input type="password" name="confirm" id="confirm" class="form-control"
+            placeholder="Please re-enter your new password" required>
+    </div>
+    <p class="text-center">Password Must Contain At Least One Of The Following: Number / Uppercase / Lowercase / Special
+        Character. Length: 6 - 20 Characters.</p>
+    <button class="btn btn-md btn-dark" type="submit">Reset</button>
+</form>
+{% endblock %}

@@ -24,7 +24,7 @@
       </tr>
       {% else %}
         {% for movie in follows %}
-        {% if movie['released'] == True %}
+        {% if movie['released'] == True and movie['release'] != 'TBA' %}
           <tr class="d-flex bg-released">
         {% else %}
           <tr class="d-flex bg-unreleased">

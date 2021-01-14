@@ -6,10 +6,11 @@ import time
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask import flash, g, redirect, render_template, request, url_for, session
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
-from api import lookup, lookupById
+from api import lookup, lookupById, lookupReleaseDate, lookupTrailer
 from utilities import login_required
-from emailer import send_release_mail
+from emailer import send_release_mail, send_reset_mail
 from datetime import datetime
 
 # define our flask app
@@ -36,6 +37,19 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(255))
+
+    def get_reset_token(self, expires_sec=1800):
+        s = Serializer(app.config['SECRET_KEY'], expires_sec)
+        return s.dumps({'user_id': self.id}).decode('utf8')
+    
+    @staticmethod
+    def verify_reset_token(token):
+        s = Serializer(app.config['SECRET_KEY'])
+        try:
+            user_id = s.loads(token)['user_id']
+        except:
+            return None
+        return User.query.get(user_id)
 
     def __init__(self, username, password):
         self.username = username
@@ -94,6 +108,13 @@ def results():
         # get the movie id from the form and look it up in our api
         id = request.form['movie_id']
         movie = lookupById(id)[0]
+        release = lookupReleaseDate(id)
+
+        if release['digital']['full'] == 'TBA':
+            release_date = release['theatre']['small']
+        else:
+            release_date = release['digital']['small']
+
         # set error to none
         error = None
         # check to make sure user is not already following
@@ -102,7 +123,7 @@ def results():
             error = 'You are already following {}!'.format(movie['name'])
         # if not following then insert the follow into the database
         else:
-            insert_follow = Follows(session['user_id'], movie['id'], movie['name'], movie['release_date'])
+            insert_follow = Follows(session['user_id'], movie['id'], movie['name'], release_date)
             db.session.add(insert_follow)
             db.session.commit()
             # flask success message and re-render template
@@ -116,11 +137,22 @@ def results():
 @app.route('/<int:id>/details', methods=('GET', 'POST'))
 def details(id):
     movie = lookupById(id)
+    release = lookupReleaseDate(id)
+    trailer = lookupTrailer(id)
     # if get - then get api information and pass that to the template
     if request.method == 'GET':
-        return render_template('search/details.html', details=movie)
+        if release['digital']['full'] == 'TBA':
+            release_date = release['theatre']['full']
+        else:
+            release_date = release['digital']['full']
+        return render_template('search/details.html', details=movie, release=release_date, trailer=trailer)
     # else if they click the follow button
     elif request.method == 'POST':
+        if release['digital']['full'] == 'TBA':
+            release_date = release['theatre']['small']
+        else:
+            release_date = release['digital']['small']
+
         movie = lookupById(id)[0]
         error = None
         # check to make sure user is not already following
@@ -128,7 +160,7 @@ def details(id):
             error = 'You are already following {}!'.format(movie['name'])
         else:
             # if not following then insert the follow into the database
-            insert_follow = Follows(g.user.id, movie['id'], movie['name'], movie['release_date'])
+            insert_follow = Follows(g.user.id, movie['id'], movie['name'], release_date)
             db.session.add(insert_follow)
             db.session.commit()
             # success message and reload new follows page
@@ -137,12 +169,19 @@ def details(id):
         # flash any error message
     flash(error)
     return redirect(url_for('follows'))
+
+@app.route('/schedule')
+def schedule():
+    if request.method == 'GET':
+        check_db()
+        return render_template('search/schedule.html')
+
 # register route
 @app.route('/auth/register', methods=('GET', 'POST'))
 def register():
     # on post - retrieve info from our form
     if request.method == 'POST':
-        username = request.form['username']
+        username = request.form['username'].lower()
         password = request.form['password']
         confirm = request.form['confirm']
         # pre-set error to None
@@ -181,18 +220,12 @@ def register():
     # if get then render template  
     return render_template('auth/register.html')
 
-@app.route('/schedule')
-def schedule():
-    if request.method == 'GET':
-        check_db()
-        return render_template('search/schedule.html')
-
 # login route
 @app.route('/auth/login', methods=('POST', 'GET'))
 def login():
     if request.method == 'POST':
         # on post - retrieve info from our form
-        username = request.form['username']
+        username = request.form['username'].lower()
         password = request.form['password']
         error = None
 
@@ -214,6 +247,8 @@ def login():
         # flash error if there is one
         flash(error)
     # get request renders template
+    if g.user is not None:
+        return redirect(url_for('index'))
     return render_template('auth/login.html')
 
 # follows route to display users followed movies
@@ -223,15 +258,22 @@ def login():
 def follows():
     # grab users follows from the database and arrange them in order by release date
     if request.method == 'GET':
-        follows = db.session.query(Follows.movie_id).filter(Follows.user_id == session['user_id']).order_by(Follows.movie_date.desc()).all()
+        follows = db.session.query(Follows).filter(Follows.user_id == session['user_id']).order_by(Follows.movie_date.desc()).all()
         followList = []
         # create a list of all users follows to display in the template
         for i in range(len(follows)):
             movie_id = lookupById(follows[i].movie_id)[0]
+
+            release = lookupReleaseDate(movie_id['id'])
+            if release['digital']['full'] == 'TBA':
+                release_date = release['theatre']['full']
+            else:
+                release_date = release['digital']['full']
+
             followList.append({
                 "name": movie_id["name"],
                 "id": movie_id["id"],
-                "release": movie_id["release"],
+                "release": release_date,
                 "cover" : movie_id["cover"],
                 "rating": movie_id["rating"],
                 "released": movie_id["released"]
@@ -252,13 +294,18 @@ def follows():
         # create an updated follows list
         follows = db.session.query(Follows.movie_id).filter(Follows.user_id == session['user_id']).order_by(Follows.movie_date.desc()).all()
         followList = []
-
+        
         for i in range(len(follows)):
             movie_id = lookupById(follows[i].movie_id)[0]
+            release = lookupReleaseDate(movie_id['id'])
+            if release['digital']['full'] == 'TBA':
+                release_date = release['theatre']['full']
+            else:
+                release_date = release['digital']['full']
             followList.append({
                 "name": movie_id["name"],
                 "id": movie_id["id"],
-                "release": movie_id["release"],
+                "release": release_date,
                 "cover" : movie_id["cover"],
                 "rating": movie_id["rating"],
                 "released": movie_id["released"]
@@ -309,6 +356,65 @@ def check_db():
             except:
                 print('Email Error')
 
+@app.route('/auth/forgot' , methods=('GET', 'POST'))
+def forgot():
+    if request.method == 'GET':
+        return render_template('auth/forgot.html')
+    if request.method == 'POST':
+        username = request.form['username'].lower()
+        user = db.session.query(User).filter(User.username == username).first()
+        if user is None or user is []:
+            error = 'User {} does not exist.'.format(username)
+        else:
+            token = user.get_reset_token()
+            link = url_for('reset', token=token, _external=True)
+            send_reset_mail(username, token, link)
+            flash('An email has been sent with instructions to reset your password.')
+            return redirect(url_for('login'))
+        flash(error)
+    return render_template('auth/forgot.html')
+
+@app.route('/auth/reset/<token>', methods=('GET', 'POST'))
+def reset(token):
+    user = User.verify_reset_token(token)
+    if request.method == 'GET':
+        if user is None:
+            flash('That is an invalid or expired token', 'warning')
+            return redirect(url_for('forgot'))
+        else:
+            return render_template('auth/reset.html')
+    elif request.method == 'POST':
+        password = request.form['password']
+        confirm = request.form['confirm']
+        # pre-set error to None
+        error = None
+
+        # init regex
+        reg = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&-_])[A-Za-z\d@$!#%*?&-_]{6,20}$"
+        # Compile Regex
+        pat = re.compile(reg)
+        # Search Regex
+        mat = re.search(pat, password)
+
+        if not password:
+            error = 'You must provide a password'
+        # make sure passwords match
+        elif password != confirm:
+            error = 'Passwords must match'
+        elif not mat:
+            error = 'Password must contain (one number / one uppercase / one lowercase / one special symbol (@$!%*#?&-_) / be between 6-20 characters'
+        # if no errors then insert user into database
+        if error is None:
+            hashed_password = generate_password_hash(password)
+            user.password = hashed_password
+            db.session.commit()
+            # flash success message
+            flash('Your Password Has Been Updated! Please Login.')
+            return redirect(url_for('login'))
+        # flash any errors
+        flash(error)
+    # if get then render template  
+    return render_template('auth/reset.html')
 # testing run
 # if __name__ == '__main__':
 #     app.run()

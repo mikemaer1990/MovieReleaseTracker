@@ -9,7 +9,7 @@
 <div id="detailsContainer" class="d-flex justify-content-center mt-lg-5 mt-md-2">
   <div id="movieDetailsContainer" class="text-center">
     <p>{{item['name']}}</p>
-    <p>Release Date: {{item['release']}} </p>
+    <p>Release Date: {{release}} </p>
     {% if item['cover'] == 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None' %}
         <img id="movie_cover" src="{{ url_for('static', filename='err_img.gif') }}" alt="movie poster" class="img-responsive">
     {% else %}
@@ -35,7 +35,9 @@
           <a href="https://www.imdb.com/title/{{item['imdb']}}" target="_blank"><img id="imdb_button" src="../../static/imdb.svg"></a>
         {% endif %}
       </div>
-        
+      {% if trailer != None %}
+      <iframe width="560" height="315" src="{{ trailer }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      {% endif %}
     </form>
   </div>
 </div>
