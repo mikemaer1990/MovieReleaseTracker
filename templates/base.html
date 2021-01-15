@@ -1,14 +1,15 @@
 <!doctype html>
 <html lang="en">
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="Track upcoming movie release dates easily. Find new movies to follow. Get an email reminder when the movie you are following is released.">
+<meta name="description"
+  content="Track upcoming movie release dates easily. Find new movies to follow. Get an email reminder when the movie you are following is released.">
 <title>{% block title %}{% endblock %} - Movie Release Tracker</title>
 <link rel="shortcut icon" href="../static/k.svg" type="image/x-icon">
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
   integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 <link rel="stylesheet" href="../../static/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap" rel="stylesheet">
-<nav class="navbar navbar-expand-sm navbar-light bg-transparent">
+<nav class="navbar navbar-expand-lg navbar-light bg-transparent">
   <a class="navbar-brand" href="/">
 
     <svg width="30" height="30" viewBox="0 0 1417 1719" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -680,20 +681,30 @@
     </svg>
 
   </a>
-
-  <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse" data-target="#collapsibleNavId"
-    aria-controls="collapsibleNavId" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="collapsibleNavId">
-    <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-      {% if g.user %}
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('follows') }}">Your Follows</a>
-      </li>
-      {% endif %}
-    </ul>
-    <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+  <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+    {% if g.user %}
+    <li class="nav-item">
+      <a class="nav-link" href="{{ url_for('follows') }}">Your Follows</a>
+    </li>
+    {% endif %}
+  </ul>
+  <div class="btn-group"> <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse"
+      data-target="#collapsibleNavId" aria-controls="collapsibleNavId" aria-expanded="false"
+      aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <button class="navbar-toggler d-lg-none mr-1" type="button" data-toggle="collapse"
+      data-target="#collapsibleNavIdSearch" aria-controls="collapsibleNavId" aria-expanded="false"
+      aria-label="Toggle navigation">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search"
+        viewBox="0 0 16 16">
+        <path
+          d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
+      </svg>
+    </button></div>
+  {% if home != True %}
+  <div class="collapse navbar-collapse" id="collapsibleNavIdSearch">
+    <ul class="navbar-nav mr-auto ml-3 mt-2 mt-lg-0">
       <form class="d-flex mr-3" action="/results" method="get">
         <div class="input-group mt-1">
           <div class="input-group-prepend">
@@ -703,6 +714,11 @@
             required>
         </div>
       </form>
+  </div>
+  {% endif %}
+
+  <div class="collapse navbar-collapse" id="collapsibleNavId">
+    <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
       {% if g.user %}
       <li class="nav-item mt-2 mr-3"><span class="text-capitalize">{{ g.user.username }}</span>
       <li class="nav-item mt-2 mr-2 text-primary"><a href="{{ url_for('logout') }}">Log Out</a>
@@ -728,4 +744,5 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
   integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous">
 </script>
+
 </html>

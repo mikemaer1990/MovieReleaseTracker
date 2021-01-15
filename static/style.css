@@ -42,6 +42,7 @@ input[type="text"]:focus {
 #followsTable {
     margin-bottom: 5rem;
 }
+
 #search_container {
     position: fixed;
     top: 50%;
@@ -72,7 +73,6 @@ input[type="text"]:focus {
     position: relative;
     width: 100%;
     display: flex;
-    align-items: center;
     justify-content: center;
     text-align: center;
     max-height: 80vh !important;

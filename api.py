@@ -5,12 +5,15 @@ from flask import request
 from datetime import datetime
 
 # function to lookup movie in API via name string
+
+
 def lookup(movie):
     # Contact API
     try:
         # retrieve api_key
         api_key = configuration.API_KEY_STORAGE
-        response = requests.get(f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&language=en-US&query={movie}&page=1&include_adult=false&region=US")
+        response = requests.get(
+            f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&language=en-US&query={movie}&page=1&include_adult=false&region=US")
         response.raise_for_status()
     except requests.RequestException:
         return None
@@ -34,22 +37,29 @@ def lookup(movie):
                 "id": result["id"],
                 "release": release_year,
                 "full_release": result["release_date"],
-                "cover" : f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}',
+                "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}',
                 "rating": result["vote_average"],
-                "overview" : result["overview"]
+                "overview": result["overview"]
             })
+
+            def sort(e):
+                return e['release']
+
+            results.sort(reverse=True, key=sort)
         return results
     except (KeyError, TypeError, ValueError):
         return None
     finally:
         return results
 
+
 def lookupTv(title):
     # Contact API
     try:
         # retrieve api_key
         api_key = configuration.API_KEY_STORAGE
-        response = requests.get(f"https://api.themoviedb.org/3/search/tv?api_key={api_key}&language=en-US&page=1&query={title}&include_adult=false")
+        response = requests.get(
+            f"https://api.themoviedb.org/3/search/tv?api_key={api_key}&language=en-US&page=1&query={title}&include_adult=false")
         response.raise_for_status()
     except requests.RequestException:
         return None
@@ -73,9 +83,9 @@ def lookupTv(title):
                 "id": result["id"],
                 "release": release_year,
                 "full_release": result["release_date"],
-                "cover" : f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}',
+                "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}',
                 "rating": result["vote_average"],
-                "overview" : result["overview"]
+                "overview": result["overview"]
             })
         return results
     except (KeyError, TypeError, ValueError):
@@ -84,11 +94,14 @@ def lookupTv(title):
         return results
 
 # function to lookup movies by id
+
+
 def lookupById(id):
     try:
         # retrieve api_key
         api_key = configuration.API_KEY_STORAGE
-        response = requests.get(f"https://api.themoviedb.org/3/movie/{id}?api_key={api_key}&language=en-US&region=CA")    
+        response = requests.get(
+            f"https://api.themoviedb.org/3/movie/{id}?api_key={api_key}&language=en-US&region=CA")
         response.raise_for_status()
     except requests.RequestException:
         return None
@@ -103,18 +116,16 @@ def lookupById(id):
         # parse release date info
         date_obj = datetime.strptime(movies["release_date"], '%Y-%m-%d')
         release_date = date_obj.strftime('%B %d, %Y')
-        released = date_obj.date() < datetime.now().date()
 
         # create an object and add it to our results list
         results.append({
             "name": movies["original_title"],
             "id": movies["id"],
-            "release_date" : movies["release_date"],
+            "release_date": movies["release_date"],
             "release": release_date,
-            "cover" : f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}',
+            "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}',
             "rating": movies["vote_average"],
-            "imdb": movies["imdb_id"],
-            "released" : released
+            "imdb": movies["imdb_id"]
         })
 
         return results
@@ -124,6 +135,8 @@ def lookupById(id):
         return results
 
 # function to lookup release date
+
+
 def lookupReleaseDate(id):
     release_obj = None
     digital = None
@@ -131,7 +144,8 @@ def lookupReleaseDate(id):
     try:
         # retrieve api_key
         api_key = configuration.API_KEY_STORAGE
-        response = requests.get(f"https://api.themoviedb.org/3/movie/{id}/release_dates?&api_key={api_key}")
+        response = requests.get(
+            f"https://api.themoviedb.org/3/movie/{id}/release_dates?&api_key={api_key}")
         response.raise_for_status()
     except requests.RequestException:
         return None
@@ -143,11 +157,13 @@ def lookupReleaseDate(id):
             if i['iso_3166_1'] == 'US':
                 for y in i['release_dates']:
                     if y['type'] == 4:
-                        digital = datetime.strptime(y['release_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
+                        digital = datetime.strptime(
+                            y['release_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
                         digital_full = digital.strftime('%B %d, %Y')
                         digital_small = digital.strftime('%Y-%m-%d')
                     elif y['type'] == 3:
-                        theatre = datetime.strptime(y['release_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
+                        theatre = datetime.strptime(
+                            y['release_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
                         theatre_full = theatre.strftime('%B %d, %Y')
                         theatre_small = theatre.strftime('%Y-%m-%d')
         if digital is None:
@@ -158,8 +174,8 @@ def lookupReleaseDate(id):
             theatre_small = 'TBA'
 
         release_obj = {
-            "digital" : { "full" : digital_full, "small" : digital_small },
-            "theatre" : { "full" : theatre_full, "small" : theatre_small }
+            "digital": {"full": digital_full, "small": digital_small},
+            "theatre": {"full": theatre_full, "small": theatre_small}
         }
 
         return release_obj
@@ -168,12 +184,14 @@ def lookupReleaseDate(id):
     finally:
         return release_obj
 
+
 def lookupTrailer(id):
     trailer_url = None
     try:
         # retrieve api_key
         api_key = configuration.API_KEY_STORAGE
-        response = requests.get(f"https://api.themoviedb.org/3/movie/{id}/videos?api_key={api_key}&language=en-US")
+        response = requests.get(
+            f"https://api.themoviedb.org/3/movie/{id}/videos?api_key={api_key}&language=en-US")
         response.raise_for_status()
     except requests.RequestException:
         return None
