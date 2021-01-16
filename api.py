@@ -4,6 +4,54 @@ import configuration
 from flask import request
 from datetime import datetime
 
+
+def lookupReleaseDate(id):
+    release_obj = None
+    digital = None
+    theatre = None
+    try:
+        # retrieve api_key
+        api_key = configuration.API_KEY_STORAGE
+        response = requests.get(
+            f"https://api.themoviedb.org/3/movie/{id}/release_dates?&api_key={api_key}")
+        response.raise_for_status()
+    except requests.RequestException:
+        return None
+        # Parse response
+    try:
+        # jsonify response
+        movies = response.json()['results']
+        for i in movies:
+            if i['iso_3166_1'] == 'US':
+                for y in i['release_dates']:
+                    if y['type'] == 4:
+                        digital = datetime.strptime(
+                            y['release_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
+                        digital_full = digital.strftime('%B %d, %Y')
+                        digital_small = digital.strftime('%Y-%m-%d')
+                    elif y['type'] == 3:
+                        theatre = datetime.strptime(
+                            y['release_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
+                        theatre_full = theatre.strftime('%B %d, %Y')
+                        theatre_small = theatre.strftime('%Y-%m-%d')
+        if digital is None:
+            digital_full = 'TBA'
+            digital_small = 'TBA'
+        if theatre is None:
+            theatre_full = 'TBA'
+            theatre_small = 'TBA'
+
+        release_obj = {
+            "digital": {"full": digital_full, "small": digital_small},
+            "theatre": {"full": theatre_full, "small": theatre_small}
+        }
+
+        return release_obj
+    except (KeyError, TypeError, ValueError):
+        return None
+    finally:
+        return release_obj
+
 # function to lookup movie in API via name string
 
 
@@ -114,20 +162,28 @@ def lookupById(id):
         # pre-set cover to be used in f string
         cover = movies["poster_path"]
         # parse release date info
-        date_obj = datetime.strptime(movies["release_date"], '%Y-%m-%d')
-        release_date = date_obj.strftime('%B %d, %Y')
+        release = lookupReleaseDate(movies['id'])
+        if release['digital']['full'] == 'TBA':
+            release_date = release['theatre']['full']
+            date_obj = datetime.strptime(
+                release['theatre']['small'], '%Y-%m-%d')
+        else:
+            release_date = release['digital']['full']
+            date_obj = datetime.strptime(
+                release['digital']['small'], '%Y-%m-%d')
+        released = date_obj.date() <= datetime.now().date()
 
         # create an object and add it to our results list
         results.append({
             "name": movies["original_title"],
             "id": movies["id"],
-            "release_date": movies["release_date"],
-            "release": release_date,
+            "release_small": date_obj.date(),
+            "release_full": release_date,
             "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}',
             "rating": movies["vote_average"],
-            "imdb": movies["imdb_id"]
+            "imdb": movies["imdb_id"],
+            "released": released
         })
-
         return results
     except (KeyError, TypeError, ValueError):
         return None
@@ -135,54 +191,6 @@ def lookupById(id):
         return results
 
 # function to lookup release date
-
-
-def lookupReleaseDate(id):
-    release_obj = None
-    digital = None
-    theatre = None
-    try:
-        # retrieve api_key
-        api_key = configuration.API_KEY_STORAGE
-        response = requests.get(
-            f"https://api.themoviedb.org/3/movie/{id}/release_dates?&api_key={api_key}")
-        response.raise_for_status()
-    except requests.RequestException:
-        return None
-        # Parse response
-    try:
-        # jsonify response
-        movies = response.json()['results']
-        for i in movies:
-            if i['iso_3166_1'] == 'US':
-                for y in i['release_dates']:
-                    if y['type'] == 4:
-                        digital = datetime.strptime(
-                            y['release_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
-                        digital_full = digital.strftime('%B %d, %Y')
-                        digital_small = digital.strftime('%Y-%m-%d')
-                    elif y['type'] == 3:
-                        theatre = datetime.strptime(
-                            y['release_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
-                        theatre_full = theatre.strftime('%B %d, %Y')
-                        theatre_small = theatre.strftime('%Y-%m-%d')
-        if digital is None:
-            digital_full = 'TBA'
-            digital_small = 'TBA'
-        if theatre is None:
-            theatre_full = 'TBA'
-            theatre_small = 'TBA'
-
-        release_obj = {
-            "digital": {"full": digital_full, "small": digital_small},
-            "theatre": {"full": theatre_full, "small": theatre_small}
-        }
-
-        return release_obj
-    except (KeyError, TypeError, ValueError):
-        return None
-    finally:
-        return release_obj
 
 
 def lookupTrailer(id):

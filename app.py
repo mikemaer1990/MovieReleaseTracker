@@ -282,25 +282,13 @@ def follows():
         # create a list of all users follows to display in the template
         for i in range(len(follows)):
             movie_id = lookupById(follows[i].movie_id)[0]
-
-            release = lookupReleaseDate(movie_id['id'])
-            if release['digital']['full'] == 'TBA':
-                release_date = release['theatre']['full']
-                date_obj = datetime.strptime(
-                    release['theatre']['small'], '%Y-%m-%d')
-            else:
-                release_date = release['digital']['full']
-                date_obj = datetime.strptime(
-                    release['digital']['small'], '%Y-%m-%d')
-            released = date_obj.date() <= datetime.now().date()
-
             followList.append({
                 "name": movie_id["name"],
                 "id": movie_id["id"],
-                "release": release_date,
+                "release": movie_id["release_full"],
                 "cover": movie_id["cover"],
                 "rating": movie_id["rating"],
-                "released": released
+                "released": movie_id["released"]
             })
         # render the template and fill it in with the retrieved info
         return render_template('user/follows.html', follows=followList)
@@ -323,25 +311,13 @@ def follows():
 
         for i in range(len(follows)):
             movie_id = lookupById(follows[i].movie_id)[0]
-            release = lookupReleaseDate(movie_id['id'])
-            if release['digital']['full'] == 'TBA':
-                release_date = release['theatre']['full']
-                date_obj = datetime.strptime(
-                    release['theatre']['small'], '%Y-%m-%d')
-            else:
-                release_date = release['digital']['full']
-                date_obj = datetime.strptime(
-                    release['digital']['small'], '%Y-%m-%d')
-            released = date_obj.date() <= datetime.now().date()
-            release = lookupReleaseDate(movie_id['id'])
-
             followList.append({
                 "name": movie_id["name"],
                 "id": movie_id["id"],
-                "release": release_date,
+                "release": movie_id["release_full"],
                 "cover": movie_id["cover"],
                 "rating": movie_id["rating"],
-                "released": released
+                "released": movie_id["released"]
             })
         # render the updated template after deletion
         return render_template('user/follows.html', follows=followList)
