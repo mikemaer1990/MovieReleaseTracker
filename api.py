@@ -34,6 +34,15 @@ def lookupReleaseDate(id):
                             y['release_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
                         theatre_full = theatre.strftime('%B %d, %Y')
                         theatre_small = theatre.strftime('%Y-%m-%d')
+                    elif y['type'] == 6:
+                        tvDate = datetime.strptime(
+                            y['release_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
+                        tvDate_full = tvDate.strftime('%B %d, %Y')
+                        tvDate_small = tvDate.strftime('%Y-%m-%d')
+        if theatre is None and digital is None:
+            digital = tvDate
+            digital_full = digital.strftime('%B %d, %Y')
+            digital_small = digital.strftime('%Y-%m-%d')
         if digital is None:
             digital_full = 'TBA'
             digital_small = 'TBA'
@@ -172,7 +181,6 @@ def lookupById(id):
             date_obj = datetime.strptime(
                 release['digital']['small'], '%Y-%m-%d')
         released = date_obj.date() <= datetime.now().date()
-
         # create an object and add it to our results list
         results.append({
             "name": movies["original_title"],

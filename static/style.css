@@ -25,12 +25,91 @@ form a {
     color: white;
 }
 
+.detailsContainerTest {
+    margin: 5rem auto;
+    display: grid;
+    grid-template-columns: 300px 2fr;
+    grid-template-rows: 0.6fr 0.6fr 0.03fr 0.6fr;
+    grid-template-areas:
+        "coverart details"
+        "coverart overview"
+        "follow overview"
+        "links related";
+    max-height: 100%;
+    width: 60%;
+    gap: 1em;
+}
+
+
+section .links a:first-child {
+    width: 100%;
+}
+
+section .links a img {
+    border-radius: 0.25rem;
+    height: 38.2%;
+    margin-bottom: 0.3em;
+    text-align: center;
+    display: inline-block;
+    width: 49%;
+}
+
+section .links a img {
+    transition: transform .2s;
+}
+
+section .links a img:hover {
+    transform: scale(1.1);
+}
+
+
+.cover img {
+    width: 100%;
+}
+
+.cover {
+    grid-area: coverart;
+    border: 1px rgba(0, 0, 0, 0.5) solid;
+    max-height: 449px;
+    min-height: 449px;
+}
+
+.follow {
+    grid-area: follow;
+    text-align: center;
+}
+
+.details {
+    grid-area: details;
+    border: 1px rgba(0, 0, 0, 0.5) solid;
+}
+
+.overview {
+    grid-area: overview;
+    border: 1px rgba(0, 0, 0, 0.5) solid;
+}
+
+.links {
+    grid-area: links;
+    border: 1px rgba(0, 0, 0, 0.5) solid;
+    border-radius: 5px;
+}
+
+.related {
+    grid-area: related;
+    border: 1px rgba(0, 0, 0, 0.5) solid;
+}
+
 .flash {
     margin: 1em 0;
     padding: 1em;
     background: #cae6f6;
     border: 1px solid #377ba8;
     text-align: center;
+}
+
+section .follow button {
+    width: 100%;
 }
 
 input[type="text"]:focus {
@@ -120,16 +199,6 @@ input[type="text"]:focus {
     width: 60%;
     margin-left: auto;
     margin-right: auto;
-}
-
-
-#imdb_button {
-    height: 38px;
-    transition: transform .2s;
-}
-
-#imdb_button:hover {
-    transform: scale(1.1);
 }
 
 #details_button:hover,

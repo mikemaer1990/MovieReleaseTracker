@@ -5,47 +5,59 @@
 
 {% block content %}
 
+
 {% for item in details %}
-<div id="detailsContainer" class="justify-content-center mt-lg-5 mt-md-2">
-  <div id="movieDetailsContainer" class="text-center">
-    <p>{{item['name']}}</p>
-    <p>Release Date: {{release}} </p>
+<div class="detailsContainerTest">
+  <section class="cover">
     {% if item['cover'] == 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None' %}
-    <img id="movie_cover" src="{{ url_for('static', filename='err_img.gif') }}" alt="movie poster"
-      class="img-responsive">
+    <img src="{{ url_for('static', filename='err_img.gif') }}" alt="movie poster">
     {% else %}
-    <img id="movie_cover" src="{{ item['cover'] }}" alt="movie poster">
+    <img src="{{ item['cover'] }}" alt="movie poster">
     {% endif %}
-
+  </section>
+  <section class="details pl-2">
+    <h2 class="mt-2 mb-0">{{item['name']}}</h2>
+    <p class="mb-0">Directed By: </p>
+    <p class="mt-0">Release Date: {{release}} </p>
     {% if item['rating'] == 0 %}
-    <p>Rating: N/A</p>
+    <p class="mb-0">Rating: N/A</p>
     {% else %}
-    <p>Rating: {{item['rating']}}</p>
+    <p class="mb-0">Rating: {{item['rating']}}</p>
     {% endif %}
-
+    <p>Genres: </p>
+  </section>
+  <section class="follow">
     <form method="post">
-      <div class="btn-group">
-        {% if g.user %}
-        <form method="post"></form>
-        <button type="submit" name="movie_id" id="details_button" value="{{item['id']}}"
-          class="btn btn-danger mb-1"><img id="follow_svg" src="../../static/follow.svg"></button>
-        {% else %}
-        <a href="{{ url_for('login')}}"><button type="button" id="details_login_button"
-            class="btn btn-dark mb-1 position-relative">Login to Follow</button></a>
-        {% endif %}
-        {% if item['imdb'] != None %}
-        <a href="https://www.imdb.com/title/{{item['imdb']}}" target="_blank"><img id="imdb_button"
-            src="../../static/imdb.svg"></a>
-        {% endif %}
-      </div>
-      {% if trailer != None %}
-      <iframe width="560" height="315" src="{{ trailer }}" frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen></iframe>
+      {% if g.user %}
+      <button type="submit" name="movie_id" id="details_button" value="{{item['id']}}" class="btn btn-danger mb-1"><span
+          class="mr-4">Click To Follow</span><img class="ml-4" id="follow_svg" src="../../static/follow.svg"></button>
+      {% else %}
+      <a href="{{ url_for('login')}}"><button type="button" id="details_login_button"
+          class="btn btn-dark mb-1 position-relative">Login to Follow</button></a>
       {% endif %}
     </form>
-  </div>
+  </section>
+  <section class="links">
+    {% if trailer != None %}
+    <a class="mb-2 btn btn-md btn-dark" href="{{ trailer }}" target="_blank">trailer</a>
+    {% else %}
+    <a class="mb-2 btn btn-md btn-dark" href="#" target="_blank" disabled>trailer</a>
+    {% endif %}
+    <a href="https://www.netflix.com" target="_blank"><img id="netflix_button" src="../../static/netflix.png"></a>
+    <a href="https://www.primevideo.com" target="_blank"><img id="amazon_button" src="../../static/amazon.png"></a>
+    {% if item['imdb'] != None %}
+    <a href="https://www.imdb.com/title/{{item['imdb']}}" target="_blank"><img id="imdb_button"
+        src="../../static/imdb.png"></a>
+    {% endif %}
+    <a href="https://www.hulu.com" target="_blank"><img id="hulu_button" src="../../static/hulu.png"></a>
+  </section>
+  <section class="overview">
+    Overview
+  </section>
+  <section class="related">
+    Related Movies
+  </section>
 </div>
-
 {% endfor %}
+
 {% endblock %}
