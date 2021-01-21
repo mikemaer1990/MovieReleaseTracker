@@ -227,6 +227,8 @@ def lookupById(id):
         release = lookupReleaseDate(movies['id'])
         trailer = lookupTrailer(id)
         director = lookupDirector(id)
+        
+        # THIS NEEDS WORK CLEARLY 
         if release['digital']['full'] == 'TBA' and release['theatre']['full'] == 'TBA' or not release['digital']['full'] and not release['theatre']['full']:
             date_obj = datetime.strptime(movies["release_date"], '%Y-%m-%d')
             release_year = date_obj.strftime('%Y')
@@ -236,6 +238,10 @@ def lookupById(id):
             date_obj = datetime.strptime(
                 release['theatre']['small'], '%Y-%m-%d')
         elif release['theatre']['full'] == 'TBA':
+            release_date = release['digital']['full']
+            date_obj = datetime.strptime(
+                release['digital']['small'], '%Y-%m-%d')
+        else:
             release_date = release['digital']['full']
             date_obj = datetime.strptime(
                 release['digital']['small'], '%Y-%m-%d')
