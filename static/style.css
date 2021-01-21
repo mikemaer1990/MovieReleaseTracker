@@ -29,17 +29,29 @@ form a {
     margin: 5rem auto;
     display: grid;
     grid-template-columns: 300px 2fr;
-    grid-template-rows: 0.6fr 0.6fr 0.03fr 0.6fr;
+    grid-template-rows: 0.9fr 1fr 0.6fr;
     grid-template-areas:
         "coverart details"
         "coverart overview"
-        "follow overview"
         "links related";
     max-height: 100%;
     width: 60%;
     gap: 1em;
 }
 
+.formTop {
+    position: relative;
+    top: -5%;
+}
+
+.btn-circle {
+    width: 40px;
+    height: 40px;
+    padding: 12px 0px;
+    border-radius: 20px;
+    font-size: 8px;
+    text-align: center;
+}
 
 section .links a:first-child {
     width: 100%;
@@ -61,7 +73,6 @@ section .links a img {
 section .links a img:hover {
     transform: scale(1.1);
 }
-
 
 .cover img {
     width: 100%;
@@ -162,12 +173,12 @@ input[type="text"]:focus {
     max-height: 554px !important;
 }
 
-#details_button,
+/* #details_button,
 #details_login_button {
     position: relative;
     bottom: 0;
     transition: transform .2s;
-}
+} */
 
 #movieDetailsContainer {
     width: 33vw;

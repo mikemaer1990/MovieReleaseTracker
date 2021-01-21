@@ -115,12 +115,6 @@ def results():
         # get the movie id from the form and look it up in our api
         id = request.form['movie_id']
         movie = lookupById(id)[0]
-        release = lookupReleaseDate(id)
-
-        if release['digital']['full'] == 'TBA':
-            release_date = release['theatre']['small']
-        else:
-            release_date = release['digital']['small']
 
         # set error to none
         error = None
@@ -131,7 +125,7 @@ def results():
         # if not following then insert the follow into the database
         else:
             insert_follow = Follows(
-                session['user_id'], movie['id'], movie['name'], release_date)
+                session['user_id'], movie['id'], movie['name'], movie['release_small'])
             db.session.add(insert_follow)
             db.session.commit()
             # flask success message and re-render template
@@ -147,22 +141,14 @@ def results():
 @app.route('/<int:id>/details', methods=('GET', 'POST'))
 def details(id):
     movie = lookupById(id)
-    release = lookupReleaseDate(id)
-    trailer = lookupTrailer(id)
     # if get - then get api information and pass that to the template
     if request.method == 'GET':
-        if release['digital']['full'] == 'TBA':
-            release_date = release['theatre']['full']
-        else:
-            release_date = release['digital']['full']
-        return render_template('search/details.html', details=movie, release=release_date, trailer=trailer)
+        date_obj = datetime.strptime(movie[0]['release_full'], '%B %d, %Y')
+        release_year = date_obj.strftime('%Y')
+        release = movie[0]['release_full']
+        return render_template('search/details.html', details=movie, release=release, year=release_year)
     # else if they click the follow button
     elif request.method == 'POST':
-        if release['digital']['full'] == 'TBA':
-            release_date = release['theatre']['small']
-        else:
-            release_date = release['digital']['small']
-
         movie = lookupById(id)[0]
         error = None
         # check to make sure user is not already following
@@ -171,7 +157,7 @@ def details(id):
         else:
             # if not following then insert the follow into the database
             insert_follow = Follows(
-                g.user.id, movie['id'], movie['name'], release_date)
+                g.user.id, movie['id'], movie['name'], movie['release_small'])
             db.session.add(insert_follow)
             db.session.commit()
             # success message and reload new follows page
@@ -182,7 +168,7 @@ def details(id):
     return redirect(url_for('follows'))
 
 
-@app.route('/schedule')
+@ app.route('/schedule')
 def schedule():
     if request.method == 'GET':
         check_db()
@@ -191,7 +177,7 @@ def schedule():
 # register route
 
 
-@app.route('/auth/register', methods=('GET', 'POST'))
+@ app.route('/auth/register', methods=('GET', 'POST'))
 def register():
     # on post - retrieve info from our form
     if request.method == 'POST':
@@ -237,7 +223,7 @@ def register():
 # login route
 
 
-@app.route('/auth/login', methods=('POST', 'GET'))
+@ app.route('/auth/login', methods=('POST', 'GET'))
 def login():
     if request.method == 'POST':
         # on post - retrieve info from our form
@@ -270,15 +256,16 @@ def login():
 # follows route to display users followed movies
 
 
-@app.route('/user/follows', methods=('GET', 'POST'))
+@ app.route('/user/follows', methods=('GET', 'POST'))
 # ensure user is logged in
-@login_required
+@ login_required
 def follows():
     # grab users follows from the database and arrange them in order by release date
     if request.method == 'GET':
         follows = db.session.query(Follows).filter(
             Follows.user_id == session['user_id']).order_by(Follows.movie_date.desc()).all()
         followList = []
+
         # create a list of all users follows to display in the template
         for i in range(len(follows)):
             movie_id = lookupById(follows[i].movie_id)[0]
@@ -325,7 +312,7 @@ def follows():
 # this will store the users id in a global variable accessible anywhere
 
 
-@app.before_request
+@ app.before_request
 def load_logged_in_user():
     user_id = session.get('user_id')
     if user_id is None:
@@ -337,7 +324,7 @@ def load_logged_in_user():
 # logout route
 
 
-@app.route('/logout')
+@ app.route('/logout')
 def logout():
     g.user = None
     session.clear()
@@ -374,7 +361,7 @@ def check_db():
                 print('Email Error')
 
 
-@app.route('/auth/forgot', methods=('GET', 'POST'))
+@ app.route('/auth/forgot', methods=('GET', 'POST'))
 def forgot():
     if request.method == 'GET':
         return render_template('auth/forgot.html')
@@ -393,7 +380,7 @@ def forgot():
     return render_template('auth/forgot.html')
 
 
-@app.route('/auth/reset/<token>', methods=('GET', 'POST'))
+@ app.route('/auth/reset/<token>', methods=('GET', 'POST'))
 def reset(token):
     user = User.verify_reset_token(token)
     if request.method == 'GET':

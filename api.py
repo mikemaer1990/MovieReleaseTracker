@@ -9,6 +9,7 @@ def lookupReleaseDate(id):
     release_obj = None
     digital = None
     theatre = None
+    tvDate = None
     try:
         # retrieve api_key
         api_key = configuration.API_KEY_STORAGE
@@ -40,9 +41,15 @@ def lookupReleaseDate(id):
                         tvDate_full = tvDate.strftime('%B %d, %Y')
                         tvDate_small = tvDate.strftime('%Y-%m-%d')
         if theatre is None and digital is None:
-            digital = tvDate
-            digital_full = digital.strftime('%B %d, %Y')
-            digital_small = digital.strftime('%Y-%m-%d')
+            if tvDate is None:
+                digital_full = 'TBA'
+                digital_small = 'TBA'
+                theatre_full = 'TBA'
+                theatre_small = 'TBA'
+            else:
+                digital = tvDate
+                digital_full = digital.strftime('%B %d, %Y')
+                digital_small = digital.strftime('%Y-%m-%d')
         if digital is None:
             digital_full = 'TBA'
             digital_small = 'TBA'
@@ -61,7 +68,57 @@ def lookupReleaseDate(id):
     finally:
         return release_obj
 
+
+def lookupTrailer(id):
+    trailer_url = None
+    try:
+        # retrieve api_key
+        api_key = configuration.API_KEY_STORAGE
+        response = requests.get(
+            f"https://api.themoviedb.org/3/movie/{id}/videos?api_key={api_key}&language=en-US")
+        response.raise_for_status()
+    except requests.RequestException:
+        return None
+        # Parse response
+    try:
+        # jsonify response
+        movies = response.json()['results']
+        trailer_key = movies[0]['key']
+        if trailer_key is not None:
+            trailer_url = f"https://www.youtube.com/embed/{trailer_key}"
+            return trailer_url
+        else:
+            return None
+    except (KeyError, TypeError, ValueError):
+        return None
+    finally:
+        return trailer_url
 # function to lookup movie in API via name string
+
+
+def lookupDirector(id):
+    director_name = None
+    try:
+        # retrieve api_key
+        api_key = configuration.API_KEY_STORAGE
+        response = requests.get(
+            f"https://api.themoviedb.org/3/movie/{id}/credits?api_key={api_key}&language=en-US")
+        response.raise_for_status()
+    except requests.RequestException:
+        return None
+        # Parse response
+    try:
+        directors = []
+        # jsonify response
+        results = response.json()
+        for i in results['crew']:
+            if i['job'] == 'Director':
+                directors.append(i['name'])
+        return directors
+    except (KeyError, TypeError, ValueError):
+        return None
+    finally:
+        return directors
 
 
 def lookup(movie):
@@ -95,8 +152,7 @@ def lookup(movie):
                 "release": release_year,
                 "full_release": result["release_date"],
                 "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}',
-                "rating": result["vote_average"],
-                "overview": result["overview"]
+                "rating": result["vote_average"]
             })
 
             def sort(e):
@@ -139,10 +195,7 @@ def lookupTv(title):
                 "name": result["original_title"],
                 "id": result["id"],
                 "release": release_year,
-                "full_release": result["release_date"],
-                "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}',
-                "rating": result["vote_average"],
-                "overview": result["overview"]
+                "full_release": result["release_date"]
             })
         return results
     except (KeyError, TypeError, ValueError):
@@ -172,15 +225,22 @@ def lookupById(id):
         cover = movies["poster_path"]
         # parse release date info
         release = lookupReleaseDate(movies['id'])
-        if release['digital']['full'] == 'TBA':
+        trailer = lookupTrailer(id)
+        director = lookupDirector(id)
+        if release['digital']['full'] == 'TBA' and release['theatre']['full'] == 'TBA' or not release['digital']['full'] and not release['theatre']['full']:
+            date_obj = datetime.strptime(movies["release_date"], '%Y-%m-%d')
+            release_year = date_obj.strftime('%Y')
+            release_date = date_obj.strftime('%B %d, %Y')
+        elif release['digital']['full'] == 'TBA':
             release_date = release['theatre']['full']
             date_obj = datetime.strptime(
                 release['theatre']['small'], '%Y-%m-%d')
-        else:
+        elif release['theatre']['full'] == 'TBA':
             release_date = release['digital']['full']
             date_obj = datetime.strptime(
                 release['digital']['small'], '%Y-%m-%d')
         released = date_obj.date() <= datetime.now().date()
+
         # create an object and add it to our results list
         results.append({
             "name": movies["original_title"],
@@ -190,7 +250,11 @@ def lookupById(id):
             "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}',
             "rating": movies["vote_average"],
             "imdb": movies["imdb_id"],
-            "released": released
+            "released": released,
+            "trailer": trailer,
+            "overview": movies["overview"],
+            "genres": movies["genres"],
+            "director": director
         })
         return results
     except (KeyError, TypeError, ValueError):
@@ -198,33 +262,6 @@ def lookupById(id):
     finally:
         return results
 
-# function to lookup release date
-
-
-def lookupTrailer(id):
-    trailer_url = None
-    try:
-        # retrieve api_key
-        api_key = configuration.API_KEY_STORAGE
-        response = requests.get(
-            f"https://api.themoviedb.org/3/movie/{id}/videos?api_key={api_key}&language=en-US")
-        response.raise_for_status()
-    except requests.RequestException:
-        return None
-        # Parse response
-    try:
-        # jsonify response
-        movies = response.json()['results']
-        trailer_key = movies[0]['key']
-        if trailer_key is not None:
-            trailer_url = f"https://www.youtube.com/embed/{trailer_key}"
-            return trailer_url
-        else:
-            return None
-    except (KeyError, TypeError, ValueError):
-        return None
-    finally:
-        return trailer_url
 
 # if __name__ == "__main__":
 #     print(lookupTrailer('641662'))
