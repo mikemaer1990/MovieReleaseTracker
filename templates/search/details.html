@@ -7,69 +7,105 @@
 
 
 {% for item in details %}
-<div class="detailsContainerTest">
-  <section class="cover">
-    {% if item['cover'] == 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None' %}
-    <img src="{{ url_for('static', filename='err_img.gif') }}" alt="movie poster">
-    {% else %}
-    <img src="{{ item['cover'] }}" alt="movie poster">
-    {% endif %}
-  </section>
-  <section class="details pl-2">
-
-    <h2 class="mt-2 mb-0 d-inline-block">{{item['name']}} ({{ year }})</h2>
-    <form class="d-inline-block mt-0 formTop ml-2" method="post">
-      {% if g.user %}
-      <button type="submit" name="movie_id" id="details_button" value="{{item['id']}}"
-        class="btn btn-circle btn-outline-danger mt-1"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-          fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
-          <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z" />
-        </svg></button>
+<div class="detailsBG">
+  <div class="detailsContainerTest outsetBorder">
+    <section class="cover">
+      {% if item['cover'] == 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None' %}
+      <img src="{{ url_for('static', filename='err_img.gif') }}" alt="movie poster">
       {% else %}
-      <a href="{{ url_for('login')}}"><button type="button" id="details_login_button"
-          class="btn btn-sm btn-dark mt-0">Login to
-          Follow</button></a>
+      <img src="{{ item['cover'] }}" alt="movie poster">
       {% endif %}
-    </form>
+      {% if item['trailer'] != None %}
+      <a id="trailer" class="trailer" href="{{ item['trailer'] }}" target="_blank"><button>Trailer</button></a>
+      {% else %}
+      <a id="trailer" class="trailer" href="#"><button disabled="">Trailer</button></a>
+      {% endif %}
+    </section>
+    <section class="details pl-2 outsetBorderWhite">
 
+      <h3 class="mt-2 mb-md-0 d-inline-block">{{item['name']}} <span class="detailsYear">({{ year }})</span>
+        <form class="d-inline-block mt-0 formTop ml-1" method="post">
+          {% if g.user %}
+          <button type="submit" name="movie_id" id="details_button" value="{{item['id']}}"
+            class="btn btn-circle btn-outline-danger"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+              fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z" />
+            </svg></button>
+          {% else %}
+          <a href="{{ url_for('login')}}"><button type="button" id="details_login_button"
+              class="btn btn-sm btn-dark mt-0">Login to
+              Follow</button></a>
+          {% endif %}
+        </form>
+      </h3>
 
-    <p class="mb-0 d-inl">Directed By: 
-      {% if item['director'] %}
+      <p class="mb-0 d-inl">Directed By:
+        {% if item['director'] %}
         {{ item['director'][0] }}
-      {% else %}
+        {% else %}
         Uknown Director
+        {% endif %}
+      </p>
+      <p class="mt-0 mb-0">Release Date: {{release}} </p>
+      {% if item['rating'] == 0 %}
+      <p class="mb-0">Rating: N/A</p>
+      {% else %}
+      <p class="mb-0">Rating: {{item['rating']}}</p>
       {% endif %}
-    </p>
-    <p class="mt-0">Release Date: {{release}} </p>
-    {% if item['rating'] == 0 %}
-    <p class="mb-0">Rating: N/A</p>
-    {% else %}
-    <p class="mb-0">Rating: {{item['rating']}}</p>
-    {% endif %}
-    <p>Genres: </p>
-  </section>
-  <section class="follow">
-  </section>
-  <section class="links">
-    {% if trailer != None %}
-    <a class="mb-2 btn btn-md btn-dark" href="{{ item['trailer'] }}" target="_blank">trailer</a>
-    {% else %}
-    <a class="mb-2 btn btn-md btn-dark" href="#" target="_blank" disabled>trailer</a>
-    {% endif %}
-    <a href="https://www.netflix.com" target="_blank"><img id="netflix_button" src="../../static/netflix.png"></a>
-    <a href="https://www.primevideo.com" target="_blank"><img id="amazon_button" src="../../static/amazon.png"></a>
-    {% if item['imdb'] != None %}
-    <a href="https://www.imdb.com/title/{{item['imdb']}}" target="_blank"><img id="imdb_button"
-        src="../../static/imdb.png"></a>
-    {% endif %}
-    <a href="https://www.hulu.com" target="_blank"><img id="hulu_button" src="../../static/hulu.png"></a>
-  </section>
-  <section class="overview">
-    Overview
-  </section>
-  <section class="related">
-    Related Movies
-  </section>
+      <p class="mb-0">Genres:
+        {% if item['genres'] %}
+        {% for genre in item['genres'] %}
+        {{genre['name']}}{{ ", " if not loop.last else "" }}
+        {% endfor %}
+        {% else %}
+        N/A
+        {% endif %}
+
+      </p>
+      <p class="mb-0">Cast:
+        {% if item['cast'] != 'N/A' %}
+        {% for i in range(5) %}
+        {{item['cast'][i]['name']}}{{ ", " if not loop.last else "" }}
+        {% endfor %}
+        {% else %}
+        N/A
+        {% endif %}
+      </p>
+    </section>
+  
+    <section class="follow">
+      <form class="formTop" method="post">
+        {% if g.user %}
+        <button type="submit" name="movie_id" id="detailsbutton" value="{{item['id']}}"
+          class="btn btn-block btn-danger">Follow</button>
+        {% else %}
+        <a href="{{ url_for('login')}}"><button type="button" id="details_login_button"
+            class="btn btn-block btn-danger">Login to
+            Follow</button></a>
+        {% endif %}
+      </form>
+    </section>
+    <section class="links outsetBorderWhite">
+      <h5>Where To Watch</h5>
+    </section>
+    <section class="overview pl-2 outsetBorderWhite">
+      <h4 class="pt-1">Overview</h4>
+      {{ item['overview'] }}
+    </section>
+    <section class="related outsetBorderWhite">
+      {% for movie in related %}
+      <div class="relatedMovieCover">
+        <a href="{{ url_for('details', id=movie['id']) }}">
+          {% if movie['cover'] == 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None' %}
+          <img src="{{ url_for('static', filename='err_img.gif') }}" alt="movie poster">
+          {% else %}
+          <img src="{{ movie['cover'] }}" alt="movie poster">
+          {% endif %}
+        </a>
+      </div>
+      {% endfor %}
+    </section>
+  </div>
 </div>
 {% endfor %}
 

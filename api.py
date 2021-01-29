@@ -95,9 +95,68 @@ def lookupTrailer(id):
         return trailer_url
 # function to lookup movie in API via name string
 
+def lookupRelatedMovies(id):
+    try:
+        # retrieve api_key
+        api_key = configuration.API_KEY_STORAGE
+        response = requests.get(
+            f"https://api.themoviedb.org/3/movie/{id}/recommendations?api_key={api_key}&language=en-US&page=1")
+        response.raise_for_status()
+    except requests.RequestException:
+        return None
+        # Parse response
+    try:
+        # jsonify response
+        movies = response.json()['results']
+        relatedList = []
+        # for each result - store their data in a new list
+        for result in movies:
+            cover = result["poster_path"]
+            # create an object and add it to our results list
+            relatedList.append({
+                "name": result["original_title"],
+                "id": result["id"],
+                "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}'
+            })
 
-def lookupDirector(id):
-    director_name = None
+        return relatedList
+    except (KeyError, TypeError, ValueError):
+        return None
+    finally:
+        return relatedList
+
+def lookupUpcomingMovies(id):
+    related_movies = None
+    try:
+        # retrieve api_key
+        api_key = configuration.API_KEY_STORAGE
+        response = requests.get(
+            f"https://api.themoviedb.org/3/movie/{id}/upcoming?api_key={api_key}&language=en-US&page=1&region=")
+        response.raise_for_status()
+    except requests.RequestException:
+        return None
+        # Parse response
+    try:
+        # jsonify response
+        movies = response.json()['results']
+        relatedList = []
+        # for each result - store their data in a new list
+        for result in movies:
+            cover = result["poster_path"]
+            # create an object and add it to our results list
+            relatedList.append({
+                "name": result["original_title"],
+                "id": result["id"],
+                "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}'
+            })
+
+        return relatedList
+    except (KeyError, TypeError, ValueError):
+        return None
+    finally:
+        return relatedList
+
+def lookupCast(id):
     try:
         # retrieve api_key
         api_key = configuration.API_KEY_STORAGE
@@ -108,26 +167,64 @@ def lookupDirector(id):
         return None
         # Parse response
     try:
-        directors = []
+        castList = []
+        crewList = []
+
         # jsonify response
-        results = response.json()
-        for i in results['crew']:
+        cast = response.json()['cast']
+        crew = response.json()['crew']
+
+        # Create cast list
+        if cast != []:
+            for i in range(len(cast)):
+                picPath = cast[i]['profile_path']
+                if picPath is None:
+                    picPath = 'None'
+                castList.append({
+                        "id" : cast[i]['id'],
+                        "name" : cast[i]['name'],
+                        "picture" : f'https://www.themoviedb.org/t/p/original{picPath}',
+                        "character" : cast[i]['character']
+                })
+        # Create crew list
+        for i in crew:
             if i['job'] == 'Director':
-                directors.append(i['name'])
-        return directors
+                crewList.append(i['name'])
+        if cast != [] and crew != []:
+            # create credits object with cast and crew lists
+            creditsList = {
+                "cast" : castList,
+                "crew" : crewList
+            }
+        elif crew == []:
+            creditsList = {
+                    "cast" : crewList,
+                    "crew" : 'N/A'
+                }
+        elif cast == []:
+            creditsList = {
+                "cast" : 'N/A',
+                "crew" : crewList
+            }        
+        else:
+            creditsList = {
+                    "cast" : 'N/A',
+                    "crew" : 'N/A'
+                }
+        # return
+        return creditsList
     except (KeyError, TypeError, ValueError):
         return None
     finally:
-        return directors
+        return creditsList
 
-
-def lookup(movie):
+def lookup(movie, page=1):
     # Contact API
     try:
         # retrieve api_key
         api_key = configuration.API_KEY_STORAGE
         response = requests.get(
-            f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&language=en-US&query={movie}&page=1&include_adult=false&region=US")
+            f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&language=en-US&query={movie}&page={page}&include_adult=false&region=US")
         response.raise_for_status()
     except requests.RequestException:
         return None
@@ -135,6 +232,7 @@ def lookup(movie):
     try:
         # jsonify response
         movies = response.json()
+        print(movies['total_pages'])
         # initialize result list
         results = []
         search = movies['results']
@@ -226,8 +324,7 @@ def lookupById(id):
         # parse release date info
         release = lookupReleaseDate(movies['id'])
         trailer = lookupTrailer(id)
-        director = lookupDirector(id)
-        
+        credits = lookupCast(id)
         # THIS NEEDS WORK CLEARLY 
         if release['digital']['full'] == 'TBA' and release['theatre']['full'] == 'TBA' or not release['digital']['full'] and not release['theatre']['full']:
             date_obj = datetime.strptime(movies["release_date"], '%Y-%m-%d')
@@ -246,7 +343,7 @@ def lookupById(id):
             date_obj = datetime.strptime(
                 release['digital']['small'], '%Y-%m-%d')
         released = date_obj.date() <= datetime.now().date()
-
+        
         # create an object and add it to our results list
         results.append({
             "name": movies["original_title"],
@@ -260,7 +357,8 @@ def lookupById(id):
             "trailer": trailer,
             "overview": movies["overview"],
             "genres": movies["genres"],
-            "director": director
+            "director": credits['crew'],
+            "cast": credits['cast']
         })
         return results
     except (KeyError, TypeError, ValueError):

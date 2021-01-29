@@ -1,6 +1,7 @@
 html {
     height: 100vh;
     width: 100vw;
+    font-size: 16px;
 }
 
 body {
@@ -22,21 +23,54 @@ form a:link {
 }
 
 form a {
-    color: white;
+    color: rgb(242, 243, 234);
+}
+
+.cover {
+    text-align: center;
+}
+
+.cover button {
+    width: 100%;
+    background-image: linear-gradient(45deg, #771f68, #cf0c0c50);
+    border: none;
+    padding: 0.42rem;
+
+}
+
+.cover button:hover {
+    background-image: linear-gradient(45deg, #cf0c0c50, #771f68);
+    cursor: pointer;
+    transition: 1s background-image;
+}
+
+.outsetBorder {
+    border: 3px outset black;
+    background-color: #100f0f14;
+    border-radius: 5px;
+}
+
+.outsetBorderWhite {
+    border: 3px outset black;
+    background-color: whitesmoke;
+    border-radius: 5px;
 }
 
 .detailsContainerTest {
-    margin: 5rem auto;
+    position: relative;
+    margin: 2% auto;
+    padding: 2rem;
     display: grid;
-    grid-template-columns: 300px 2fr;
-    grid-template-rows: 0.9fr 1fr 0.6fr;
+    grid-template-columns: 275px 1fr;
+    grid-template-rows: 0.7fr 1fr 0.6fr;
     grid-template-areas:
         "coverart details"
         "coverart overview"
         "links related";
     max-height: 100%;
     width: 60%;
-    gap: 1em;
+    gap: 1rem;
+    color: black
 }
 
 .formTop {
@@ -53,26 +87,25 @@ form a {
     text-align: center;
 }
 
-section .links a:first-child {
-    width: 100%;
+section .details h3 {
+    font-size: 1.7em;
 }
 
-section .links a img {
-    border-radius: 0.25rem;
-    height: 38.2%;
-    margin-bottom: 0.3em;
-    text-align: center;
+.related {
+    display: flex;
+    grid-area: related;
+    overflow-x: scroll;
+    overflow-y: hidden;
+}
+
+.relatedMovieCover {
     display: inline-block;
-    width: 49%;
 }
 
-section .links a img {
-    transition: transform .2s;
+.relatedMovieCover img {
+    height: 138px;
 }
 
-section .links a img:hover {
-    transform: scale(1.1);
-}
 
 .cover img {
     width: 100%;
@@ -80,7 +113,6 @@ section .links a img:hover {
 
 .cover {
     grid-area: coverart;
-    border: 1px rgba(0, 0, 0, 0.5) solid;
     max-height: 449px;
     min-height: 449px;
 }
@@ -88,27 +120,32 @@ section .links a img:hover {
 .follow {
     grid-area: follow;
     text-align: center;
+    display: None;
+}
+
+.mobileMovieDetails {
+    display: none;
+    grid-area: mobileMovieDetails;
+    text-align: center;
 }
 
 .details {
     grid-area: details;
-    border: 1px rgba(0, 0, 0, 0.5) solid;
 }
 
 .overview {
     grid-area: overview;
-    border: 1px rgba(0, 0, 0, 0.5) solid;
+    max-height: 300px;
+    overflow-y: auto;
 }
 
 .links {
     grid-area: links;
-    border: 1px rgba(0, 0, 0, 0.5) solid;
     border-radius: 5px;
 }
 
-.related {
-    grid-area: related;
-    border: 1px rgba(0, 0, 0, 0.5) solid;
+.detailsYear {
+    color: rgba(0, 0, 0, 0.664);
 }
 
 .flash {
@@ -350,9 +387,22 @@ svg:hover #flap {
     }
 }
 
+@media only screen and (max-width: 1500px) {
+    .detailsContainerTest {
+        width: 80%;
+        font-size: 0.95em;
+    }
+}
+
 @media only screen and (max-width: 1400px) {
     #movieDetailsContainer {
         width: 40%;
+    }
+}
+
+@media only screen and (max-width: 1200px) {
+    .detailsContainerTest {
+        font-size: 0.9em;
     }
 }
 
@@ -362,23 +412,61 @@ svg:hover #flap {
     }
 }
 
-@media only screen and (max-height: 780px) {
-    #movie_cover {
-        height: 50vh;
-    }
-}
-
 @media only screen and (max-width: 900px) {
     #movieDetailsContainer {
         width: 55%;
     }
 
+}
+
+@media only screen and (max-width: 990px) {
     #detailsContainer {
         height: 90vh;
     }
-}
 
-@media only screen and (max-width: 1000px) {
+    .detailsContainerTest {
+        position: relative;
+        /*         
+        height: 90vh; */
+        margin-top: 1rem;
+        grid-template-columns: 195px 1fr;
+        grid-template-rows: 300px 1fr 1fr 1fr;
+        grid-template-areas:
+            "coverart details"
+            "overview overview"
+            "related related"
+            "links links";
+        max-height: 100%;
+        min-height: 80%;
+        width: 90%;
+        gap: 1rem;
+        color: black;
+    }
+
+    .details {
+        overflow-y: auto;
+    }
+
+    div .detailsContainerTest section .overview {
+        overflow: auto;
+    }
+
+    .details h3 {
+        font-size: 0.8em;
+    }
+
+    .related {
+        min-height: 120px !important;
+    }
+
+    .links {
+        min-height: 100px !important;
+    }
+
+    .cover img {
+        height: 265px;
+    }
+
     #followsContainer {
         width: 90%;
         margin-left: auto;
@@ -386,6 +474,11 @@ svg:hover #flap {
     }
 }
 
+@media only screen and (max-height: 780px) {
+    #movie_cover {
+        height: 50vh;
+    }
+}
 
 @media only screen and (max-width: 730px) {
     #search_container {
@@ -401,6 +494,73 @@ svg:hover #flap {
         border: none !important;
         width: 100%;
         height: 100%;
+    }
+}
+
+@media only screen and (max-width: 700px) {
+    .detailsContainerTest {
+        grid-template-columns: 128px 1fr;
+        grid-template-rows: 200px 0.1fr 1fr 0.6fr 0.5fr;
+        grid-template-areas:
+            "coverart details"
+            "follow follow"
+            "overview overview"
+            "related related"
+            "links links";
+    }
+
+    section .details h3 {
+        font-size: 1.4em;
+    }
+
+    .cover img {
+        height: 163px;
+    }
+
+    section .details .btn-circle,
+    section .details button {
+        display: none;
+    }
+
+    section .follow {
+        display: block;
+    }
+
+    #details_login_button:hover {
+        transform: scale(1.02);
+    }
+    
+}
+
+@media only screen and (max-width: 500px) {
+    .detailsContainerTest {
+        padding: 10px;
+        width: 100vw;
+        grid-template-columns: 100%;
+        grid-template-rows: 200px 1fr 0.1fr 1fr 0.5fr;
+        grid-template-areas:
+            "coverart"
+            "details"
+            "follow"
+            "overview"
+            "related"
+            "links";
+    }
+
+    .cover img {
+        width: 135px;
+        margin-right: 62%;
+        border-radius: 5px 5px 0 0;
+    }
+
+    section .details {
+        max-height: 240px;
+    }
+
+    section .cover button {
+        width: 135px;
+        margin-right: 62%;
+        border-radius: 0 0 5px 5px;
     }
 }
 

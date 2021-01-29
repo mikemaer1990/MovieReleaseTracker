@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import flash, g, redirect, render_template, request, url_for, session
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
-from api import lookup, lookupById, lookupReleaseDate, lookupTrailer
+from api import lookup, lookupById, lookupReleaseDate, lookupTrailer, lookupCast, lookupRelatedMovies
 from utilities import login_required
 from emailer import send_release_mail, send_reset_mail
 from datetime import datetime
@@ -143,10 +143,12 @@ def details(id):
     movie = lookupById(id)
     # if get - then get api information and pass that to the template
     if request.method == 'GET':
+        print(movie[0]['trailer'])
         date_obj = datetime.strptime(movie[0]['release_full'], '%B %d, %Y')
         release_year = date_obj.strftime('%Y')
         release = movie[0]['release_full']
-        return render_template('search/details.html', details=movie, release=release, year=release_year)
+        related = lookupRelatedMovies(id)
+        return render_template('search/details.html', details=movie, release=release, year=release_year, related=related)
     # else if they click the follow button
     elif request.method == 'POST':
         movie = lookupById(id)[0]
