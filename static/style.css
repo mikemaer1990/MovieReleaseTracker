@@ -29,8 +29,10 @@ form a {
 .cover {
     text-align: center;
 }
-
 .cover button {
+    border-radius:  0 0 5px 5px;
+}
+.cover button, .mobileTrailer button {
     width: 100%;
     background-image: linear-gradient(45deg, #771f68, #cf0c0c50);
     border: none;
@@ -38,7 +40,7 @@ form a {
 
 }
 
-.cover button:hover {
+.cover button:hover, .mobileTrailer button:hover {
     background-image: linear-gradient(45deg, #cf0c0c50, #771f68);
     cursor: pointer;
     transition: 1s background-image;
@@ -109,12 +111,13 @@ section .details h3 {
 
 .cover img {
     width: 100%;
+    border-radius: 5px 5px 0 0;
 }
 
 .cover {
     grid-area: coverart;
     max-height: 449px;
-    min-height: 449px;
+    /* min-height: 449px; */
 }
 
 .follow {
@@ -123,12 +126,17 @@ section .details h3 {
     display: None;
 }
 
-.mobileMovieDetails {
+.mobileTitle {
     display: none;
-    grid-area: mobileMovieDetails;
-    text-align: center;
+    grid-area: mobileTitle;
+    text-align: left;
 }
 
+.mobileTrailer {
+    display: none;
+    grid-area: mobileTrailer;
+    widows: 100%;
+}
 .details {
     grid-area: details;
 }
@@ -536,31 +544,62 @@ svg:hover #flap {
     .detailsContainerTest {
         padding: 10px;
         width: 100vw;
-        grid-template-columns: 100%;
-        grid-template-rows: 200px 1fr 0.1fr 1fr 0.5fr;
+        grid-template-columns: 1fr auto;
+        grid-template-rows: 160px 0.1fr 0.8fr 0.1fr 1fr 0.5fr;
         grid-template-areas:
-            "coverart"
-            "details"
-            "follow"
-            "overview"
-            "related"
-            "links";
+            "coverart mobileTitle"
+            "mobileTrailer mobileTrailer"
+            "details details"
+            "follow follow"
+            "overview overview"
+            "related related"
+            "links links";
     }
 
+    .mobileTrailer {
+        display:block;
+        width: 100%;
+        margin-right: 62%;
+        border-radius: 0 0 5px 5px;
+    }
+    .mobileTrailer button {
+        display:block;
+        margin: 1px auto;
+        width:99%;
+        border-radius: 5px;
+        color: white;
+        font-size: larger;
+    }
+    section .mobileTitle {
+        display: inline;
+        width: 100%;
+        height: 200px;
+        margin-left: 1.5rem;
+        overflow-y: auto;
+    }
+    section .cover {
+        display: flex;
+        height: 160px;
+        width: 103.5%;
+        border: 3px outset black;
+        background-color: whitesmoke;
+        border-radius: 5px;
+    }
     .cover img {
         width: 135px;
-        margin-right: 62%;
-        border-radius: 5px 5px 0 0;
+        height: 153.8px;
+        border-radius: 5px;
     }
 
     section .details {
         max-height: 240px;
     }
 
+    section .details #test {
+        display:none;
+    }
     section .cover button {
-        width: 135px;
-        margin-right: 62%;
-        border-radius: 0 0 5px 5px;
+        display: none;
     }
 }
 

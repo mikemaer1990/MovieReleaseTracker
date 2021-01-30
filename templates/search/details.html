@@ -8,7 +8,7 @@
 
 {% for item in details %}
 <div class="detailsBG">
-  <div class="detailsContainerTest outsetBorder">
+  <div class="detailsContainerTest outsetBorderWhite">
     <section class="cover">
       {% if item['cover'] == 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None' %}
       <img src="{{ url_for('static', filename='err_img.gif') }}" alt="movie poster">
@@ -20,10 +20,14 @@
       {% else %}
       <a id="trailer" class="trailer" href="#"><button disabled="">Trailer</button></a>
       {% endif %}
+      <section class="mobileTitle">
+        <h5 class="mt-2 mb-md-0 d-inline-block">{{item['name']}} <span class="detailsYear">({{ year }})</span></h5>
+        <p class="mt-0 mb-0">Release Date: {{release}} </p>
+      </section>
     </section>
     <section class="details pl-2 outsetBorderWhite">
 
-      <h3 class="mt-2 mb-md-0 d-inline-block">{{item['name']}} <span class="detailsYear">({{ year }})</span>
+      <h3 id="test" class="mt-2 mb-md-0 d-inline-block">{{item['name']}} <span class="detailsYear">({{ year }})</span>
         <form class="d-inline-block mt-0 formTop ml-1" method="post">
           {% if g.user %}
           <button type="submit" name="movie_id" id="details_button" value="{{item['id']}}"
@@ -72,7 +76,14 @@
         {% endif %}
       </p>
     </section>
-  
+    <!-- MOBILE -->
+    <section class="mobileTrailer">
+      {% if item['trailer'] != None %}
+      <a id="trailer" class="trailer" href="{{ item['trailer'] }}" target="_blank"><button>Trailer</button></a>
+      {% else %}
+      <a id="trailer" class="trailer" href="#"><button disabled="">Trailer</button></a>
+      {% endif %}
+    </section>
     <section class="follow">
       <form class="formTop" method="post">
         {% if g.user %}
