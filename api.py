@@ -40,6 +40,12 @@ def lookupReleaseDate(id):
                             y['release_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
                         tvDate_full = tvDate.strftime('%B %d, %Y')
                         tvDate_small = tvDate.strftime('%Y-%m-%d')
+                    # Added to fix errors due to release date info being innacurate -> THANKS CORONAVIRUS
+                    elif y['type'] == 2 and not tvDate:
+                        tvDate = datetime.strptime(
+                            y['release_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
+                        tvDate_full = tvDate.strftime('%B %d, %Y')
+                        tvDate_small = tvDate.strftime('%Y-%m-%d')
         if theatre is None and digital is None:
             if tvDate is None:
                 digital_full = 'TBA'
@@ -61,7 +67,6 @@ def lookupReleaseDate(id):
             "digital": {"full": digital_full, "small": digital_small},
             "theatre": {"full": theatre_full, "small": theatre_small}
         }
-
         return release_obj
     except (KeyError, TypeError, ValueError):
         return None
@@ -125,36 +130,50 @@ def lookupRelatedMovies(id):
     finally:
         return relatedList
 
-def lookupUpcomingMovies(id):
-    related_movies = None
+def lookupUpcoming():
+    # Contact API
     try:
         # retrieve api_key
         api_key = configuration.API_KEY_STORAGE
         response = requests.get(
-            f"https://api.themoviedb.org/3/movie/{id}/upcoming?api_key={api_key}&language=en-US&page=1&region=")
+            f"https://api.themoviedb.org/3/movie/upcoming?api_key={api_key}&language=en-US&page=1&region=US")
         response.raise_for_status()
     except requests.RequestException:
         return None
         # Parse response
     try:
         # jsonify response
-        movies = response.json()['results']
-        relatedList = []
+        search = response.json()['results']
+        # initialize result list
+        upcomingList = []
         # for each result - store their data in a new list
-        for result in movies:
+        for result in search:
             cover = result["poster_path"]
+            # parse release date info
+            date_obj = datetime.strptime(result["release_date"], '%Y-%m-%d')
+            if str(datetime.now().date()) > str(date_obj):
+                print('expired')
+                continue
+            release_year = date_obj.strftime('%Y')
+            release_date = date_obj.strftime('%B %d, %Y')
             # create an object and add it to our results list
-            relatedList.append({
+            upcomingList.append({
                 "name": result["original_title"],
                 "id": result["id"],
+                "release": release_year,
+                "full_release": result["release_date"],
                 "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}'
             })
+            def sort(e):
+                return e['full_release']
 
-        return relatedList
+            upcomingList.sort(reverse=False, key=sort)
+            
+        return upcomingList
     except (KeyError, TypeError, ValueError):
         return None
     finally:
-        return relatedList
+        return upcomingList
 
 def lookupCast(id):
     try:
@@ -178,13 +197,16 @@ def lookupCast(id):
         if cast != []:
             for i in range(len(cast)):
                 picPath = cast[i]['profile_path']
+                character = cast[i]['character']
                 if picPath is None:
                     picPath = 'None'
+                if character == '':
+                    character = 'None'
                 castList.append({
                         "id" : cast[i]['id'],
                         "name" : cast[i]['name'],
                         "picture" : f'https://www.themoviedb.org/t/p/original{picPath}',
-                        "character" : cast[i]['character']
+                        "character" : character
                 })
         # Create crew list
         for i in crew:
@@ -232,7 +254,6 @@ def lookup(movie, page=1):
     try:
         # jsonify response
         movies = response.json()
-        print(movies['total_pages'])
         # initialize result list
         results = []
         search = movies['results']
@@ -263,47 +284,45 @@ def lookup(movie, page=1):
     finally:
         return results
 
-
-def lookupTv(title):
-    # Contact API
-    try:
-        # retrieve api_key
-        api_key = configuration.API_KEY_STORAGE
-        response = requests.get(
-            f"https://api.themoviedb.org/3/search/tv?api_key={api_key}&language=en-US&page=1&query={title}&include_adult=false")
-        response.raise_for_status()
-    except requests.RequestException:
-        return None
-        # Parse response
-    try:
-        # jsonify response
-        shows = response.json()
-        # initialize result list
-        results = []
-        search = shows['results']
-        # for each result - store their data in a new list
-        for result in search:
-            cover = result["poster_path"]
-            # parse release date info
-            date_obj = datetime.strptime(result["release_date"], '%Y-%m-%d')
-            release_year = date_obj.strftime('%Y')
-            release_date = date_obj.strftime('%B %d, %Y')
-            # create an object and add it to our results list
-            results.append({
-                "name": result["original_title"],
-                "id": result["id"],
-                "release": release_year,
-                "full_release": result["release_date"]
-            })
-        return results
-    except (KeyError, TypeError, ValueError):
-        return None
-    finally:
-        return results
+# -------------------------------------------- TODO -----------------------------------------------------------------------------
+# def lookupTv(title):
+#     # Contact API
+#     try:
+#         # retrieve api_key
+#         api_key = configuration.API_KEY_STORAGE
+#         response = requests.get(
+#             f"https://api.themoviedb.org/3/search/tv?api_key={api_key}&language=en-US&page=1&query={title}&include_adult=false")
+#         response.raise_for_status()
+#     except requests.RequestException:
+#         return None
+#         # Parse response
+#     try:
+#         # jsonify response
+#         shows = response.json()
+#         # initialize result list
+#         results = []
+#         search = shows['results']
+#         # for each result - store their data in a new list
+#         for result in search:
+#             cover = result["poster_path"]
+#             # parse release date info
+#             date_obj = datetime.strptime(result["release_date"], '%Y-%m-%d')
+#             release_year = date_obj.strftime('%Y')
+#             release_date = date_obj.strftime('%B %d, %Y')
+#             # create an object and add it to our results list
+#             results.append({
+#                 "name": result["original_title"],
+#                 "id": result["id"],
+#                 "release": release_year,
+#                 "full_release": result["release_date"]
+#             })
+#         return results
+#     except (KeyError, TypeError, ValueError):
+#         return None
+#     finally:
+#         return results
 
 # function to lookup movies by id
-
-
 def lookupById(id):
     try:
         # retrieve api_key
@@ -338,6 +357,11 @@ def lookupById(id):
             release_date = release['digital']['full']
             date_obj = datetime.strptime(
                 release['digital']['small'], '%Y-%m-%d')
+        # Added to fix bug in API where somehow the THEATRE date was later than the DIGITAL date
+        elif release['theatre']['small'] > release['digital']['small']:
+            release_date = release['theatre']['full']
+            date_obj = datetime.strptime(
+                release['theatre']['small'], '%Y-%m-%d')
         else:
             release_date = release['digital']['full']
             date_obj = datetime.strptime(

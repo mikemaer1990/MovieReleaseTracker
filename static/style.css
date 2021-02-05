@@ -37,25 +37,29 @@ form a {
     background-image: linear-gradient(45deg, #771f68, #cf0c0c50);
     border: none;
     padding: 0.42rem;
-
+    opacity: 1;
+    transition: 0.5s;
 }
 
 .cover button:hover, .mobileTrailer button:hover {
-    background-image: linear-gradient(45deg, #cf0c0c50, #771f68);
+    opacity: 0.8;
     cursor: pointer;
-    transition: 1s background-image;
 }
 
-.outsetBorder {
+/* .outsetBorder {
     border: 3px outset black;
     background-color: #100f0f14;
     border-radius: 5px;
-}
+} */
 
+.boldText {
+    font-weight: 600;
+}
 .outsetBorderWhite {
     border: 3px outset black;
     background-color: whitesmoke;
     border-radius: 5px;
+    padding: 8px;
 }
 
 .detailsContainerTest {
@@ -106,8 +110,13 @@ section .details h3 {
 
 .relatedMovieCover img {
     height: 138px;
+    overflow: visible;
 }
 
+.relatedMovieCover img:hover {
+    height: 138px;
+    transform: scale(1.2);
+}
 
 .cover img {
     width: 100%;
@@ -215,15 +224,8 @@ input[type="text"]:focus {
 
 #movie_cover {
     max-width: 80% !important;
-    max-height: 554px !important;
+    max-height: 350px !important;
 }
-
-/* #details_button,
-#details_login_button {
-    position: relative;
-    bottom: 0;
-    transition: transform .2s;
-} */
 
 #movieDetailsContainer {
     width: 33vw;
@@ -231,6 +233,7 @@ input[type="text"]:focus {
 }
 
 #movieContainer {
+    max-height: 513px !important;
     border: 2px solid;
     border-radius: 9.5px;
     box-shadow: 10px 10px 5px #888888;
@@ -240,6 +243,7 @@ input[type="text"]:focus {
 }
 
 #movieContainer:hover {
+    cursor: pointer;
     transform: scale(1.1);
     -webkit-animation: shadow_in 1s ease-in-out;
     animation: shadow_in 1s ease-in-out;
@@ -400,6 +404,9 @@ svg:hover #flap {
         width: 80%;
         font-size: 0.95em;
     }
+    #movieContainer {
+        font-size: 0.9em;
+    }
 }
 
 @media only screen and (max-width: 1400px) {
@@ -414,22 +421,15 @@ svg:hover #flap {
     }
 }
 
-@media only screen and (max-height: 900px) {
-    #detailsContainer {
-        height: 50%;
-    }
-}
-
-@media only screen and (max-width: 900px) {
-    #movieDetailsContainer {
-        width: 55%;
-    }
-
-}
-
 @media only screen and (max-width: 990px) {
     #detailsContainer {
         height: 90vh;
+    }
+
+    #search_container {
+        width: 90%;
+        position: relative;
+        transform: translate(-50%, 25vh);
     }
 
     .detailsContainerTest {
@@ -482,18 +482,18 @@ svg:hover #flap {
     }
 }
 
-@media only screen and (max-height: 780px) {
-    #movie_cover {
-        height: 50vh;
+@media only screen and (max-height: 900px) {
+    #detailsContainer {
+        height: 50%;
     }
 }
 
-@media only screen and (max-width: 730px) {
-    #search_container {
-        width: 90%;
-        position: relative;
-        margin-top: 65%;
-        margin-right: 50%;
+@media only screen and (max-width: 900px) {
+    #movieDetailsContainer {
+        width: 55%;
+    }
+    #search_container h2 {
+        font-size: 1.6em;
     }
 }
 
@@ -534,10 +534,63 @@ svg:hover #flap {
         display: block;
     }
 
+    #details_login_button {
+        opacity: 1;
+        transition: all 1s
+    }
     #details_login_button:hover {
-        transform: scale(1.02);
+        transform:none;
+        opacity: 0.8;
     }
     
+}
+
+@media only screen and (max-width: 575px) {
+    #movieContainer {
+        display: grid;
+        font-size: 1.1em;
+        text-align: left !important;
+        grid-template-columns: 0.4fr 1fr;
+        grid-template-rows: 0.8fr 0.8fr 1fr;
+        grid-template-areas:
+            "coverimg title"
+            "coverimg rating"
+            "coverimg links";
+        height: 200px;
+        
+    }
+    .titleYear {
+        grid-area: title;
+        display: inline-block;
+    }
+    .movieRating {
+        grid-area: rating;
+    }
+    #movie_cover {
+        height: 197px;
+        min-width: 128px;
+        grid-area: coverimg;
+        border-radius: 5px;
+        margin-right: 1rem;
+    }
+    .btnGroup {
+        grid-area: links;
+
+    }
+    #movieContainer {
+        -webkit-animation: none;
+        animation: none;
+        transition: none;
+    }
+    
+    #movieContainer:hover {
+        box-shadow: 5px 5px 2.5px #888888;
+        transform: none;
+        -webkit-animation: none;
+        animation: none;
+        -webkit-animation-fill-mode: none;
+        animation-fill-mode: none;
+    }
 }
 
 @media only screen and (max-width: 500px) {
@@ -555,7 +608,7 @@ svg:hover #flap {
             "related related"
             "links links";
     }
-
+    
     .mobileTrailer {
         display:block;
         width: 100%;
@@ -563,7 +616,6 @@ svg:hover #flap {
         border-radius: 0 0 5px 5px;
     }
     .mobileTrailer button {
-        display:block;
         margin: 1px auto;
         width:99%;
         border-radius: 5px;
@@ -595,20 +647,29 @@ svg:hover #flap {
         max-height: 240px;
     }
 
-    section .details #test {
-        display:none;
+    section .details .displayNone {
+        display:none !important;
     }
     section .cover button {
         display: none;
     }
-}
+    #followsContainer {
+        width: 95%;
+        font-size: 0.85em;
+        font-weight: 500;
+        display:flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #followsContainer button {
+        font-size: 0.85em !important;
+    }
+    
+    #search_container h2 {
+        font-size: 1.2em;
+    }
 
-@media only screen and (max-width: 575px) {
-    #movieContainer {
-        border: none;
-        border-top: 1px solid;
-        border-bottom: 1px solid;
-        border-radius: 0;
-        margin: 1.35rem !important;
+    #search_container input, #search_container button {
+        font-size: 0.9em;
     }
 }

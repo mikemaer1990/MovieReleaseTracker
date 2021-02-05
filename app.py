@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import flash, g, redirect, render_template, request, url_for, session
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
-from api import lookup, lookupById, lookupReleaseDate, lookupTrailer, lookupCast, lookupRelatedMovies
+from api import lookup, lookupById, lookupReleaseDate, lookupTrailer, lookupCast, lookupRelatedMovies, lookupUpcoming
 from utilities import login_required
 from emailer import send_release_mail, send_reset_mail
 from datetime import datetime
@@ -135,6 +135,37 @@ def results():
         flash(error)
     return render_template('search/results.html', results=searchQuery)
 
+@app.route('/upcoming', methods=('GET', 'POST'))
+def upcoming():
+    upcomingMovies = lookupUpcoming()
+    # render template with results
+    if request.method == 'GET':
+        return render_template('search/upcoming.html', results=upcomingMovies)
+    # if user clicks the follow button
+    elif request.method == 'POST':
+        # get the movie id from the form and look it up in our api
+        id = request.form['movie_id']
+        movie = lookupById(id)[0]
+
+        # set error to none
+        error = None
+        # check to make sure user is not already following
+        if db.session.query(Follows).filter(Follows.user_id == session['user_id'], Follows.movie_id == movie['id']).count() > 0:
+            # set error message appropriately
+            error = 'You are already following {}!'.format(movie['name'])
+        # if not following then insert the follow into the database
+        else:
+            insert_follow = Follows(
+                session['user_id'], movie['id'], movie['name'], movie['release_small'])
+            db.session.add(insert_follow)
+            db.session.commit()
+            # flask success message and re-render template
+            flash('Now following {}!'.format(movie['name']))
+            return render_template('search/upcoming.html', results=upcomingMovies)
+        # flash error message
+        flash(error)
+    return render_template('search/upcoming.html', results=upcomingMovies)
+
 # details route to show movie info and imdb link / takes one arguement (id of the movie)
 
 
@@ -143,7 +174,6 @@ def details(id):
     movie = lookupById(id)
     # if get - then get api information and pass that to the template
     if request.method == 'GET':
-        print(movie[0]['trailer'])
         date_obj = datetime.strptime(movie[0]['release_full'], '%B %d, %Y')
         release_year = date_obj.strftime('%Y')
         release = movie[0]['release_full']
@@ -215,8 +245,12 @@ def register():
             db.session.add(insert_user)
             db.session.commit()
             # flash success message
-            flash('Now Registered As: {}! Please Login.'.format(username))
-            return redirect(url_for('login'))
+            user = User.query.filter_by(username=username).first()
+            session.clear()
+            session['user_id'] = user.id
+            # redirect to home page
+            flash('Now Registered As: {}! Welcome.'.format(username))
+            return redirect(url_for('index'))
         # flash any errors
         flash(error)
     # if get then render template
@@ -243,11 +277,11 @@ def login():
             return redirect(url_for('index'))
         # parse for errors and set error message accordingly
         elif not user or user is None:
-            error = 'User not found'
+            error = 'Invalid Username/Password Combination'
         elif not username or not password:
             error = 'You must fill in both fields'
         else:
-            error = 'Invalid password'
+            error = 'Invalid Username/Password Combination'
         # flash error if there is one
         flash(error)
     # get request renders template
@@ -267,17 +301,23 @@ def follows():
         follows = db.session.query(Follows).filter(
             Follows.user_id == session['user_id']).order_by(Follows.movie_date.desc()).all()
         followList = []
-
         # create a list of all users follows to display in the template
+        # ------------------------------------ TODO ----------------------------------------------------------------
+        # UPDATED AND SPED UP THE LOADING OF FOLLOWS SIGNIFICANTLY
+        # BUT NOW WE NEED TO DOUBLE CHECK THE RELEASE DATES HAVE NOT CHANGED PERIODICALLY
+        # ------------------------------------ TODO ----------------------------------------------------------------
         for i in range(len(follows)):
-            movie_id = lookupById(follows[i].movie_id)[0]
+            date_obj = datetime.strptime(follows[i].movie_date, '%Y-%m-%d')
+            release_year = date_obj.strftime('%Y')
+            release = date_obj.strftime('%B %d, %Y')
+            released = date_obj.date() <= datetime.now().date()
+            title = follows[i].movie_title
+            movie_id = follows[i].movie_id
             followList.append({
-                "name": movie_id["name"],
-                "id": movie_id["id"],
-                "release": movie_id["release_full"],
-                "cover": movie_id["cover"],
-                "rating": movie_id["rating"],
-                "released": movie_id["released"]
+                "name": title,
+                "id": movie_id,
+                "release": release,
+                "released": released
             })
         # render the template and fill it in with the retrieved info
         return render_template('user/follows.html', follows=followList)
@@ -294,20 +334,33 @@ def follows():
         db.session.delete(delete_this)
         db.session.commit()
         # create an updated follows list
-        follows = db.session.query(Follows.movie_id).filter(
+        follows = db.session.query(Follows).filter(
             Follows.user_id == session['user_id']).order_by(Follows.movie_date.desc()).all()
         followList = []
-
         for i in range(len(follows)):
-            movie_id = lookupById(follows[i].movie_id)[0]
+            date_obj = datetime.strptime(follows[i].movie_date, '%Y-%m-%d')
+            release_year = date_obj.strftime('%Y')
+            release = date_obj.strftime('%B %d, %Y')
+            released = date_obj.date() <= datetime.now().date()
+            title = follows[i].movie_title
+            movie_id = follows[i].movie_id
             followList.append({
-                "name": movie_id["name"],
-                "id": movie_id["id"],
-                "release": movie_id["release_full"],
-                "cover": movie_id["cover"],
-                "rating": movie_id["rating"],
-                "released": movie_id["released"]
+                "name": title,
+                "id": movie_id,
+                "release": release,
+                "released": released
             })
+        # ------------------------------------ OLD FOLLOWS LOADING ZZZZ --------------------------------
+        # for i in range(len(follows)):
+        #     movie_id = lookupById(follows[i].movie_id)[0]
+        #     followList.append({
+        #         "name": movie_id["name"],
+        #         "id": movie_id["id"],
+        #         "release": movie_id["release_full"],
+        #         "cover": movie_id["cover"],
+        #         "rating": movie_id["rating"],
+        #         "released": movie_id["released"]
+        #     })
         # render the updated template after deletion
         return render_template('user/follows.html', follows=followList)
 

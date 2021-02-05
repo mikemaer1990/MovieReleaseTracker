@@ -22,12 +22,12 @@
       {% endif %}
       <section class="mobileTitle">
         <h5 class="mt-2 mb-md-0 d-inline-block">{{item['name']}} <span class="detailsYear">({{ year }})</span></h5>
-        <p class="mt-0 mb-0">Release Date: {{release}} </p>
+        <p class="mt-0 mb-0">Release Date: <span class="boldText">{{release}}</span></p>
       </section>
     </section>
     <section class="details pl-2 outsetBorderWhite">
 
-      <h3 id="test" class="mt-2 mb-md-0 d-inline-block">{{item['name']}} <span class="detailsYear">({{ year }})</span>
+      <h3 id="" class="mt-2 mb-md-0 d-inline-block displayNone">{{item['name']}} <span class="detailsYear">({{ year }})</span>
         <form class="d-inline-block mt-0 formTop ml-1" method="post">
           {% if g.user %}
           <button type="submit" name="movie_id" id="details_button" value="{{item['id']}}"
@@ -45,18 +45,19 @@
 
       <p class="mb-0 d-inl">Directed By:
         {% if item['director'] %}
-        {{ item['director'][0] }}
+        <span class="boldText">{{ item['director'][0] }}</span>
         {% else %}
-        Uknown Director
+        <span class="boldText">Unknown Director</span>
         {% endif %}
       </p>
-      <p class="mt-0 mb-0">Release Date: {{release}} </p>
+      <p id="" class="mt-0 mb-0 displayNone">Release Date: <span class="boldText">{{release}}</span> </p>
       {% if item['rating'] == 0 %}
-      <p class="mb-0">Rating: N/A</p>
+      <p class="mb-0">Rating: <span class="boldText">N/A</span></p>
       {% else %}
-      <p class="mb-0">Rating: {{item['rating']}}</p>
+      <p class="mb-0">Rating: <span class="boldText">{{item['rating']}}</span></p>
       {% endif %}
       <p class="mb-0">Genres:
+        <span class="boldText">
         {% if item['genres'] %}
         {% for genre in item['genres'] %}
         {{genre['name']}}{{ ", " if not loop.last else "" }}
@@ -64,16 +65,23 @@
         {% else %}
         N/A
         {% endif %}
-
+        </span>
       </p>
       <p class="mb-0">Cast:
-        {% if item['cast'] != 'N/A' %}
-        {% for i in range(5) %}
-        {{item['cast'][i]['name']}}{{ ", " if not loop.last else "" }}
-        {% endfor %}
-        {% else %}
-        N/A
+        <span class="boldText">
+        {% if item['cast'] != 'N/A' and item['cast'] != [] %}
+          {% if item['cast']|length >= 5%}
+            {% set i = 5%}
+          {% else %}
+            {% set i = item['cast']|length %}
+          {% endif %}
+          {% for i in range(i) %}
+            {{item['cast'][i]['name']}}{{ ", " if not loop.last else "" }}
+          {% endfor %}
+          {% else %}
+          N/A
         {% endif %}
+      </span>
       </p>
     </section>
     <!-- MOBILE -->
@@ -103,9 +111,20 @@
       <h4 class="pt-1">Overview</h4>
       {{ item['overview'] }}
     </section>
-    <section class="related outsetBorderWhite">
+    
+      {% if related == [] %}
+      <section class="related outsetBorderWhite d-block p-0 text-center">
+        <h2 class="pt-3">No related movies found...</h2>
+        <form class="p-2 mx-auto" action="https://www.google.com/search" target="_blank" method="GET">
+          <div class="d-grid gap-2">
+            <button class="btn btn-primary btn-md m-auto" name="q" value="{{item['name']}} related movies"type="submit" class="">Click here for related movies</button>
+          </div>
+        </form>
+      </section>
+      {% else %}
+      <section class="related outsetBorderWhite p-0">
       {% for movie in related %}
-      <div class="relatedMovieCover">
+      <div class="relatedMovieCover pe-1">
         <a href="{{ url_for('details', id=movie['id']) }}">
           {% if movie['cover'] == 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None' %}
           <img src="{{ url_for('static', filename='err_img.gif') }}" alt="movie poster">
@@ -116,6 +135,7 @@
       </div>
       {% endfor %}
     </section>
+    {% endif %}
   </div>
 </div>
 {% endfor %}
