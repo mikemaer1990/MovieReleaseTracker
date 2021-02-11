@@ -2,13 +2,14 @@ import os
 import configuration
 import re
 import time
+import requests
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask import flash, g, redirect, render_template, request, url_for, session
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
-from api import lookup, lookupById, lookupReleaseDate, lookupTrailer, lookupCast, lookupRelatedMovies, lookupUpcoming
+from api import lookup, lookupById, lookupReleaseDate, lookupTrailer, lookupCast, lookupRelatedMovies, lookupUpcoming, lookupPopular, lookupPersonMovies, lookupPersonProfile, lookupGenre
 from utilities import login_required
 from emailer import send_release_mail, send_reset_mail
 from datetime import datetime
@@ -100,14 +101,21 @@ def index():
 @app.route('/results', methods=('GET', 'POST'))
 def results():
     query = request.args.get('query')
+    pageCount = requests.get(
+        f"https://api.themoviedb.org/3/search/movie?api_key={configuration.API_KEY_STORAGE}&language=en-US&query={query}&include_adult=false&region=US").json()["total_pages"]
+    page = request.args.get('page')
+    if page is None:
+        page = 1
+    else:
+        page = int(page)
     # use our api to get results based on query string
-    searchQuery = lookup(query)
+    searchQuery = lookup(query, page)
     # render template with results
     if request.method == 'GET':
         if searchQuery == []:
             error = 'Please refine your search query to be more specific'
         else:
-            return render_template('search/results.html', results=searchQuery)
+            return render_template('search/results.html', results=searchQuery, page=page, pageCount=pageCount, query=query)
         flash(error)
         return redirect(url_for('index'))
     # if user clicks the follow button
@@ -130,17 +138,112 @@ def results():
             db.session.commit()
             # flask success message and re-render template
             flash('Now following {}!'.format(movie['name']))
-            return render_template('search/results.html', results=searchQuery)
+            return render_template('search/results.html', results=searchQuery, page=page, pageCount=pageCount, query=query)
         # flash error message
         flash(error)
-    return render_template('search/results.html', results=searchQuery)
+    return render_template('search/results.html', results=searchQuery, page=page, pageCount=pageCount, query=query)
+
 
 @app.route('/upcoming', methods=('GET', 'POST'))
 def upcoming():
-    upcomingMovies = lookupUpcoming()
+    pageCount = requests.get(
+        f"https://api.themoviedb.org/3/movie/upcoming?api_key={configuration.API_KEY_STORAGE}&language=en-US&region=US").json()["total_pages"]
+    page = request.args.get('page')
+    if page is None:
+        page = 1
+    else:
+        page = int(page)
+    upcomingMovies = lookupUpcoming(page)
     # render template with results
     if request.method == 'GET':
-        return render_template('search/upcoming.html', results=upcomingMovies)
+        if upcomingMovies == []:
+            return redirect(url_for('index'))
+        return render_template('search/upcoming.html', results=upcomingMovies, page=page, pageCount=pageCount)
+    # if user clicks the follow button
+    elif request.method == 'POST':
+        # get the movie id from the form and look it up in our api
+        id = request.form['movie_id']
+        movie = lookupById(id)[0]
+        # set error to none
+        error = None
+        # check to make sure user is not already following
+        if db.session.query(Follows).filter(Follows.user_id == session['user_id'], Follows.movie_id == movie['id']).count() > 0:
+            # set error message appropriately
+            error = 'You are already following {}!'.format(movie['name'])
+        # if not following then insert the follow into the database
+        else:
+            insert_follow = Follows(
+                session['user_id'], movie['id'], movie['name'], movie['release_small'])
+            db.session.add(insert_follow)
+            db.session.commit()
+            # flask success message and re-render template
+            flash('Now following {}!'.format(movie['name']))
+            return render_template('search/upcoming.html', results=upcomingMovies, page=page, pageCount=pageCount)
+        # flash error message
+        flash(error)
+    return render_template('search/upcoming.html', results=upcomingMovies, page=page, pageCount=pageCount)
+
+
+@app.route('/popular', methods=('GET', 'POST'))
+def popular():
+    pageCount = requests.get(
+        f"https://api.themoviedb.org/3/movie/popular?api_key={configuration.API_KEY_STORAGE}&language=en-US&region=US").json()["total_pages"]
+    page = request.args.get('page')
+    if page is None:
+        page = 1
+    else:
+        page = int(page)
+    popularMovies = lookupPopular(page)
+    # render template with results
+    if request.method == 'GET':
+        if popularMovies == []:
+            return redirect(url_for('index'))
+        return render_template('search/popular.html', results=popularMovies, page=page, pageCount=pageCount)
+    # if user clicks the follow button
+    elif request.method == 'POST':
+        # get the movie id from the form and look it up in our api
+        id = request.form['movie_id']
+        movie = lookupById(id)[0]
+        # set error to none
+        error = None
+        # check to make sure user is not already following
+        if db.session.query(Follows).filter(Follows.user_id == session['user_id'], Follows.movie_id == movie['id']).count() > 0:
+            # set error message appropriately
+            error = 'You are already following {}!'.format(movie['name'])
+        # if not following then insert the follow into the database
+        else:
+            insert_follow = Follows(
+                session['user_id'], movie['id'], movie['name'], movie['release_small'])
+            db.session.add(insert_follow)
+            db.session.commit()
+            # flask success message and re-render template
+            flash('Now following {}!'.format(movie['name']))
+            return render_template('search/popular.html', results=popularMovies, page=page, pageCount=pageCount)
+        # flash error message
+        flash(error)
+    return render_template('search/popular.html', results=popularMovies, page=page, pageCount=pageCount)
+
+
+@app.route('/genres/<int:genre>/<genrename>', methods=('GET', 'POST'))
+def genres(genre, genrename):
+    # genre = request.args.get('genre')
+    pageCount = requests.get(
+        f"https://api.themoviedb.org/3/discover/movie?api_key={configuration.API_KEY_STORAGE}&language=en-US&region=US&sort_by=popularity.desc&include_adult=false&include_video=false&with_genres={genre}").json()["total_pages"]
+    page = request.args.get('page')
+    if page is None:
+        page = 1
+    else:
+        page = int(page)
+    # use our api to get results based on query string
+    searchQuery = lookupGenre(genre, page)
+    # render template with results
+    if request.method == 'GET':
+        if searchQuery == []:
+            error = 'Please refine your search query to be more specific'
+        else:
+            return render_template('search/genres.html', results=searchQuery, page=page, pageCount=pageCount, genre=genre, genrename=genrename)
+        flash(error)
+        return redirect(url_for('index'))
     # if user clicks the follow button
     elif request.method == 'POST':
         # get the movie id from the form and look it up in our api
@@ -161,22 +264,38 @@ def upcoming():
             db.session.commit()
             # flask success message and re-render template
             flash('Now following {}!'.format(movie['name']))
-            return render_template('search/upcoming.html', results=upcomingMovies)
+            return render_template('search/genres.html', results=searchQuery, page=page, pageCount=pageCount, genre=genre, genrename=genrename)
         # flash error message
         flash(error)
-    return render_template('search/upcoming.html', results=upcomingMovies)
+    return render_template('search/genres.html', results=searchQuery, page=page, pageCount=pageCount, genre=genre, genrename=genrename)
 
 # details route to show movie info and imdb link / takes one arguement (id of the movie)
 
 
-@app.route('/<int:id>/details', methods=('GET', 'POST'))
+@app.route('/profile/<int:id>', methods=('GET', 'POST'))
+def profile(id):
+    movies = lookupPersonMovies(id)
+    profile = lookupPersonProfile(id)
+    # if get - then get api information and pass that to the template
+    if request.method == 'GET':
+        return render_template('search/profile.html', profile=profile, movies=movies)
+    # else if they click the follow button
+    elif request.method == 'POST':
+        return render_template('search/profile.html', profile=profile, movies=movies)
+
+
+@app.route('/details/<int:id>', methods=('GET', 'POST'))
 def details(id):
     movie = lookupById(id)
     # if get - then get api information and pass that to the template
     if request.method == 'GET':
-        date_obj = datetime.strptime(movie[0]['release_full'], '%B %d, %Y')
-        release_year = date_obj.strftime('%Y')
-        release = movie[0]['release_full']
+        if movie[0]['release_full'] == 'N/A':
+            release_year = 'N/A'
+            release = 'N/A'
+        else:
+            date_obj = datetime.strptime(movie[0]['release_full'], '%B %d, %Y')
+            release_year = date_obj.strftime('%Y')
+            release = movie[0]['release_full']
         related = lookupRelatedMovies(id)
         return render_template('search/details.html', details=movie, release=release, year=release_year, related=related)
     # else if they click the follow button
@@ -350,17 +469,6 @@ def follows():
                 "release": release,
                 "released": released
             })
-        # ------------------------------------ OLD FOLLOWS LOADING ZZZZ --------------------------------
-        # for i in range(len(follows)):
-        #     movie_id = lookupById(follows[i].movie_id)[0]
-        #     followList.append({
-        #         "name": movie_id["name"],
-        #         "id": movie_id["id"],
-        #         "release": movie_id["release_full"],
-        #         "cover": movie_id["cover"],
-        #         "rating": movie_id["rating"],
-        #         "released": movie_id["released"]
-        #     })
         # render the updated template after deletion
         return render_template('user/follows.html', follows=followList)
 

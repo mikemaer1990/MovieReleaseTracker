@@ -8,7 +8,7 @@
 
 {% for item in details %}
 <div class="detailsBG">
-  <div class="detailsContainerTest outsetBorderWhite">
+  <div class="detailsContainer outsetBorderWhite">
     <section class="cover">
       {% if item['cover'] == 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None' %}
       <img src="{{ url_for('static', filename='err_img.gif') }}" alt="movie poster">
@@ -25,9 +25,9 @@
         <p class="mt-0 mb-0">Release Date: <span class="boldText">{{release}}</span></p>
       </section>
     </section>
-    <section class="details pl-2 outsetBorderWhite">
 
-      <h3 id="" class="mt-2 mb-md-0 d-inline-block displayNone">{{item['name']}} <span class="detailsYear">({{ year }})</span>
+    <section class="details pl-2 outsetBorderWhite">
+      <h3 class="mt-2 mb-md-0 d-inline-block displayNone">{{item['name']}} <span class="detailsYear">({{ year }})</span>
         <form class="d-inline-block mt-0 formTop ml-1" method="post">
           {% if g.user %}
           <button type="submit" name="movie_id" id="details_button" value="{{item['id']}}"
@@ -45,7 +45,9 @@
 
       <p class="mb-0 d-inl">Directed By:
         {% if item['director'] %}
-        <span class="boldText">{{ item['director'][0] }}</span>
+        <a href="{{ url_for('profile', id=item['director'][0]['id'])}}">
+          <span class="boldText">{{ item['director'][0]['name'] }}</span>
+        </a>
         {% else %}
         <span class="boldText">Unknown Director</span>
         {% endif %}
@@ -58,32 +60,36 @@
       {% endif %}
       <p class="mb-0">Genres:
         <span class="boldText">
-        {% if item['genres'] %}
-        {% for genre in item['genres'] %}
-        {{genre['name']}}{{ ", " if not loop.last else "" }}
-        {% endfor %}
-        {% else %}
-        N/A
-        {% endif %}
+          {% if item['genres'] %}
+          {% for genre in item['genres'] %}
+          <a href="{{ url_for('genres', genre=genre['id'], genrename=genre['name']) }}">
+            {{genre['name']}}</a>
+          {{ ", " if not loop.last else "" }}
+          {% endfor %}
+          {% else %}
+          N/A
+          {% endif %}
         </span>
       </p>
       <p class="mb-0">Cast:
         <span class="boldText">
-        {% if item['cast'] != 'N/A' and item['cast'] != [] %}
+          {% if item['cast'] != 'N/A' and item['cast'] != [] %}
           {% if item['cast']|length >= 5%}
-            {% set i = 5%}
+          {% set i = 5%}
           {% else %}
-            {% set i = item['cast']|length %}
+          {% set i = item['cast']|length %}
           {% endif %}
           {% for i in range(i) %}
-            {{item['cast'][i]['name']}}{{ ", " if not loop.last else "" }}
+          <a
+            href="{{ url_for('profile', id=item['cast'][i]['id'])}}">{{item['cast'][i]['name']}}</a>{{ ", " if not loop.last else "" }}
           {% endfor %}
           {% else %}
           N/A
-        {% endif %}
-      </span>
+          {% endif %}
+        </span>
       </p>
     </section>
+
     <!-- MOBILE -->
     <section class="mobileTrailer">
       {% if item['trailer'] != None %}
@@ -92,6 +98,7 @@
       <a id="trailer" class="trailer" href="#"><button disabled="">Trailer</button></a>
       {% endif %}
     </section>
+
     <section class="follow">
       <form class="formTop" method="post">
         {% if g.user %}
@@ -104,25 +111,43 @@
         {% endif %}
       </form>
     </section>
-    <section class="links outsetBorderWhite">
-      <h5>Where To Watch</h5>
+
+    <section class="links">
+      {% set justWatchNameUrl = item['name']|replace(" ", "-")|replace("...", "")|replace("'", "")|replace(",", "")|replace(":", "") %}
+      <div class="d-grid gap-2 mb-3">
+        <a class="watchProviderLink" href="https://www.justwatch.com/us/movie/{{justWatchNameUrl}}" target="_blank">
+          <button class="watchProvidersButton">Watch Providers</button>
+        </a>
+      </div>
+      {% set rtNameUrl = item['name']|replace(" ", "_")|replace("...", "")|replace("'", "")|replace(",", "")|replace(":", "")|lower %}
+      <div class="d-flex">
+        {% if item['imdb'] != None %}
+        <a class="my-1 mx-auto" href="https://www.imdb.com/title/{{item['imdb']}}" target="_blank"><img alt="IMDB Image"
+            class="imdbImage" src="../../static/imdb.svg"></a>
+        {% endif %}
+        <a class="my-1 mx-auto" href="https://www.rottentomatoes.com/m/{{rtNameUrl}}" target="_blank"><img
+            src="../../static/rt.png" alt="IMDB Image" class="imdbImage"></a>
+      </div>
+
     </section>
+
     <section class="overview pl-2 outsetBorderWhite">
       <h4 class="pt-1">Overview</h4>
       {{ item['overview'] }}
     </section>
-    
-      {% if related == [] %}
-      <section class="related outsetBorderWhite d-block p-0 text-center">
-        <h2 class="pt-3">No related movies found...</h2>
-        <form class="p-2 mx-auto" action="https://www.google.com/search" target="_blank" method="GET">
-          <div class="d-grid gap-2">
-            <button class="btn btn-primary btn-md m-auto" name="q" value="{{item['name']}} related movies"type="submit" class="">Click here for related movies</button>
-          </div>
-        </form>
-      </section>
-      {% else %}
-      <section class="related outsetBorderWhite p-0">
+
+    {% if related == [] %}
+    <section class="related outsetBorderWhite d-block p-0 text-center">
+      <h2 class="pt-3">No related movies found...</h2>
+      <form class="p-2 mx-auto" action="https://www.google.com/search" target="_blank" method="GET">
+        <div class="d-grid gap-2">
+          <button class="btn btn-primary btn-md m-auto" name="q" value="{{item['name']}} related movies" type="submit"
+            class="">Click here for related movies</button>
+        </div>
+      </form>
+    </section>
+    {% else %}
+    <section class="related outsetBorderWhite p-0" id="related">
       {% for movie in related %}
       <div class="relatedMovieCover pe-1">
         <a href="{{ url_for('details', id=movie['id']) }}">
@@ -134,10 +159,12 @@
         </a>
       </div>
       {% endfor %}
+      <button id="slideLeft"><img class="arrowLeft" src="../../static/right2.png" alt=""></span></button>
+      <button id="slideRight"><img src="../../static/right2.png" alt=""></button>
     </section>
     {% endif %}
   </div>
 </div>
 {% endfor %}
-
+<script src="../static/javascripts/movieDetails.js"></script>
 {% endblock %}
