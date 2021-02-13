@@ -64,7 +64,7 @@ section .details h3 {
   padding: 2rem;
   display: grid;
   grid-template-columns: 275px 1fr;
-  grid-template-rows: 1fr 1fr 0.5fr 0.5fr;
+  grid-template-rows: 0.8fr 0.77fr 0.5fr 0.39fr;
   grid-template-areas:
     "coverart details"
     "coverart overview"
@@ -748,13 +748,18 @@ svg:hover #flap {
   #profileImg {
     height: 298px;
   }
-
+  /* DO YOU NEED THIS????/ */
   @media only screen and (max-height: 900px) {
     #detailsContainer {
       height: 50%;
     }
   }
 
+  @media only screen and (min-height: 950px) {
+    .detailsContainer {
+      margin: 10% auto;
+    }
+  }
   @media only screen and (max-width: 900px) {
     #movieDetailsContainer {
       width: 55%;

@@ -32,7 +32,7 @@
             <p class="movieRating">Rating: {{item['rating']}}</p>
             {% endif %}
             <div class="btn-group btnGroup">
-                {% if g.user %}
+                {% if g.user and item['type'] != 'tv'%}
                 <form method="post">
                     <button type="submit" name="movie_id" id="details_login_button" value="{{item['id']}}"
                         class="btn btn-outline-danger mb-1"><svg xmlns="http://www.w3.org/2000/svg" width="16"
@@ -41,7 +41,7 @@
                                 d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z" />
                         </svg></button>
                 </form>
-                {% else %}
+                {% elif not g.user %}
                 <a href="{{ url_for('login')}}"><button type="button" id="details_login_button"
                         class="btn btn-dark mb-1">Login</button></a>
                 {% endif %}
