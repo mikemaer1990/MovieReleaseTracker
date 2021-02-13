@@ -9,7 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import flash, g, redirect, render_template, request, url_for, session
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
-from api import lookup, lookupById, lookupReleaseDate, lookupTrailer, lookupCast, lookupRelatedMovies, lookupUpcoming, lookupPopular, lookupPersonMovies, lookupPersonProfile, lookupGenre
+from api import lookup, lookupById, lookupTvById, lookupReleaseDate, lookupTrailer, lookupCast, lookupRelated, lookupRelatedMovies, lookupRelatedTv, lookupTv, lookupUpcoming, lookupPopular, lookupPersonMovies, lookupPersonProfile, lookupPersonName, lookupGenre, lookupTvGenre
 from utilities import login_required
 from emailer import send_release_mail, send_reset_mail
 from datetime import datetime
@@ -81,15 +81,21 @@ def index():
     # acquire the movie title from form and pass it to the results page
     if request.method == 'POST':
         query = request.form['movie_title']
+        query_type = int(request.form['query_type'])
         # parse input to make sure its not empty and that the search will return some results
         if query == '':
             error = 'Please provide a movie title'
         # parse input to make sure it has some results
-        elif lookup(query) == []:
+        elif lookup(query) == [] and lookupPersonName(query) == []:
             error = 'Please refine your search query to be more specific'
         # if valid and results are found - redirect to results page - passing the query
         else:
-            return redirect(url_for('results', query=query))
+            if query_type == 1:
+                return redirect(url_for('results', query=query))
+            elif query_type == 2:
+                return redirect(url_for('tvresults', query=query))
+            elif query_type == 3:
+                return redirect(url_for('people', query=query))
         # flash error
         flash(error)
     # get request will display index
@@ -101,6 +107,12 @@ def index():
 @app.route('/results', methods=('GET', 'POST'))
 def results():
     query = request.args.get('query')
+    if request.args.get('query_type'):
+        query_type = int(request.args.get('query_type'))
+        if query_type == 3:
+            return redirect(url_for('people', query=query))
+        elif query_type == 2:
+            return redirect(url_for('tvresults', query=query))
     pageCount = requests.get(
         f"https://api.themoviedb.org/3/search/movie?api_key={configuration.API_KEY_STORAGE}&language=en-US&query={query}&include_adult=false&region=US").json()["total_pages"]
     page = request.args.get('page')
@@ -224,24 +236,47 @@ def popular():
     return render_template('search/popular.html', results=popularMovies, page=page, pageCount=pageCount)
 
 
-@app.route('/genres/<int:genre>/<genrename>', methods=('GET', 'POST'))
-def genres(genre, genrename):
-    # genre = request.args.get('genre')
+@app.route('/people', methods=('GET', 'POST'))
+def people():
+    query = request.args.get('query')
     pageCount = requests.get(
-        f"https://api.themoviedb.org/3/discover/movie?api_key={configuration.API_KEY_STORAGE}&language=en-US&region=US&sort_by=popularity.desc&include_adult=false&include_video=false&with_genres={genre}").json()["total_pages"]
+        f"https://api.themoviedb.org/3/search/person?api_key={configuration.API_KEY_STORAGE}&language=en-US&query={query}").json()["total_pages"]
     page = request.args.get('page')
     if page is None:
         page = 1
     else:
         page = int(page)
     # use our api to get results based on query string
-    searchQuery = lookupGenre(genre, page)
+    searchQuery = lookupPersonName(query, page)
+    # render template with results
+    if request.method == 'GET':
+        if searchQuery == []:
+            error = 'Noone found :('
+        else:
+            return render_template('search/people.html', results=searchQuery, page=page, pageCount=pageCount, query=query)
+        flash(error)
+        return redirect(url_for('index'))
+    # if user clicks the follow button
+    elif request.method == 'POST':
+        return render_template('dashboard/index.html')
+        # flash error message
+        flash(error)
+    return render_template('search/people.html', results=searchQuery, page=page, pageCount=pageCount, query=query)
+
+
+@app.route('/peoplemovies', methods=('GET', 'POST'))
+def peoplemovies():
+    query = request.args.get('id')
+    pageCount = 1
+    page = 1
+    # use our api to get results based on query string
+    searchQuery = lookupPersonMovies(query)
     # render template with results
     if request.method == 'GET':
         if searchQuery == []:
             error = 'Please refine your search query to be more specific'
         else:
-            return render_template('search/genres.html', results=searchQuery, page=page, pageCount=pageCount, genre=genre, genrename=genrename)
+            return render_template('search/results.html', results=searchQuery, page=page, pageCount=pageCount, query=query)
         flash(error)
         return redirect(url_for('index'))
     # if user clicks the follow button
@@ -264,10 +299,62 @@ def genres(genre, genrename):
             db.session.commit()
             # flask success message and re-render template
             flash('Now following {}!'.format(movie['name']))
-            return render_template('search/genres.html', results=searchQuery, page=page, pageCount=pageCount, genre=genre, genrename=genrename)
+            return render_template('search/results.html', results=searchQuery, page=page, pageCount=pageCount, query=query)
         # flash error message
         flash(error)
-    return render_template('search/genres.html', results=searchQuery, page=page, pageCount=pageCount, genre=genre, genrename=genrename)
+    return render_template('search/results.html', results=searchQuery, page=page, pageCount=pageCount, query=query)
+
+
+@app.route('/genres/<string:mediaType>/<int:genre>/<genrename>', methods=('GET', 'POST'))
+def genres(mediaType, genre, genrename):
+    # genre = request.args.get('genre')
+    if mediaType == 'movie':
+        pageCount = requests.get(
+            f"https://api.themoviedb.org/3/discover/movie?api_key={configuration.API_KEY_STORAGE}&language=en-US&region=US&sort_by=popularity.desc&include_adult=false&include_video=false&with_genres={genre}").json()["total_pages"]
+        page = request.args.get('page')
+        searchQuery = lookupGenre(genre, page)
+    elif mediaType == 'tv':
+        pageCount = requests.get(
+            f"https://api.themoviedb.org/3/discover/tv?api_key={configuration.API_KEY_STORAGE}&language=en-US&region=US&sort_by=popularity.desc&include_adult=false&include_video=false&with_genres={genre}").json()["total_pages"]
+        page = request.args.get('page')
+        searchQuery = lookupTvGenre(genre, page)
+    if page is None:
+        page = 1
+    else:
+        page = int(page)
+    # use our api to get results based on query string
+    # render template with results
+    if request.method == 'GET':
+        if searchQuery == []:
+            error = 'Please refine your search query to be more specific'
+        else:
+            return render_template('search/genres.html', results=searchQuery, page=page, pageCount=pageCount, genre=genre, genrename=genrename, mediaType=mediaType)
+        flash(error)
+        return redirect(url_for('index'))
+    # if user clicks the follow button
+    elif request.method == 'POST':
+        # get the movie id from the form and look it up in our api
+        id = request.form['movie_id']
+        movie = lookupById(id)[0]
+
+        # set error to none
+        error = None
+        # check to make sure user is not already following
+        if db.session.query(Follows).filter(Follows.user_id == session['user_id'], Follows.movie_id == movie['id']).count() > 0:
+            # set error message appropriately
+            error = 'You are already following {}!'.format(movie['name'])
+        # if not following then insert the follow into the database
+        else:
+            insert_follow = Follows(
+                session['user_id'], movie['id'], movie['name'], movie['release_small'])
+            db.session.add(insert_follow)
+            db.session.commit()
+            # flask success message and re-render template
+            flash('Now following {}!'.format(movie['name']))
+            return render_template('search/genres.html', results=searchQuery, page=page, pageCount=pageCount, genre=genre, genrename=genrename, mediaType=mediaType)
+        # flash error message
+        flash(error)
+    return render_template('search/genres.html', results=searchQuery, page=page, pageCount=pageCount, genre=genre, genrename=genrename, mediaType=mediaType)
 
 # details route to show movie info and imdb link / takes one arguement (id of the movie)
 
@@ -284,9 +371,14 @@ def profile(id):
         return render_template('search/profile.html', profile=profile, movies=movies)
 
 
-@app.route('/details/<int:id>', methods=('GET', 'POST'))
-def details(id):
-    movie = lookupById(id)
+@app.route('/details/<string:mediaType>/<int:id>', methods=('GET', 'POST'))
+def details(id, mediaType):
+    if mediaType == 'tv':
+        movie = lookupTvById(id)
+        related = lookupRelated(id)
+    else:
+        movie = lookupById(id)
+        related = lookupRelated(id)
     # if get - then get api information and pass that to the template
     if request.method == 'GET':
         if movie[0]['release_full'] == 'N/A':
@@ -296,8 +388,7 @@ def details(id):
             date_obj = datetime.strptime(movie[0]['release_full'], '%B %d, %Y')
             release_year = date_obj.strftime('%Y')
             release = movie[0]['release_full']
-        related = lookupRelatedMovies(id)
-        return render_template('search/details.html', details=movie, release=release, year=release_year, related=related)
+        return render_template('search/details.html', details=movie, release=release, year=release_year, related=related, mediaType=mediaType)
     # else if they click the follow button
     elif request.method == 'POST':
         movie = lookupById(id)[0]
@@ -317,6 +408,30 @@ def details(id):
         # flash any error message
     flash(error)
     return redirect(url_for('follows'))
+
+
+@app.route('/tvresults')
+def tvresults():
+    query = request.args.get('query')
+    pageCount = requests.get(
+        f"https://api.themoviedb.org/3/search/tv?api_key={configuration.API_KEY_STORAGE}&language=en-US&query={query}&include_adult=false").json()["total_pages"]
+    page = request.args.get('page')
+    if page is None:
+        page = 1
+    else:
+        page = int(page)
+    # use our api to get results based on query string
+    searchQuery = lookupTv(query, page)
+    # render template with results
+    if request.method == 'GET':
+        if searchQuery == []:
+            error = 'Please refine your search query to be more specific'
+        else:
+            return render_template('search/results.html', results=searchQuery, page=page, pageCount=pageCount, query=query)
+        flash(error)
+        return redirect(url_for('index'))
+    # if user clicks the follow button
+    return render_template('search/results.html', results=searchQuery, page=page, pageCount=pageCount, query=query)
 
 
 @ app.route('/schedule')

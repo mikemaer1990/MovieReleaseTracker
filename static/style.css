@@ -93,7 +93,7 @@ section .details h3 {
 }
 
 .relatedMovieCover img {
-  height: 230px;
+  height: 262px;
   overflow: visible;
 }
 
@@ -193,10 +193,19 @@ section .links a {
   color: rgba(0, 0, 0, 0.664);
 }
 .imdbImage {
-  width: 100%;
-  max-height: 50px;
+  width: 80px;
+}
+.rtImage {
+  width: 40px;
+  transition: all 1s;
 }
 
+.rtImage:hover {
+  transform: rotateZ(25deg);
+}
+#searchBarInput {
+  max-height: 38px;
+}
 .profileContainer {
   position: relative;
   margin: 2% auto;
@@ -385,7 +394,8 @@ section .follow button {
   width: 100%;
 }
 
-input[type="text"]:focus {
+input[type="text"]:focus,
+input[type="select"]:target {
   border-color: #23272b;
   box-shadow: 0 1px 1px white inset, 0 0 8px #23272b;
   outline: 0 none;
@@ -413,6 +423,9 @@ input[type="text"]:focus {
   max-width: 479px;
 }
 
+.indexSelect {
+  max-width: 25%;
+}
 #search_button {
   min-width: 50%;
 }

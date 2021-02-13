@@ -122,7 +122,9 @@ def lookupRelatedMovies(id):
             relatedList.append({
                 "name": result["original_title"],
                 "id": result["id"],
-                "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}'
+                "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}',
+                "mediaType": "movie",
+                "popularity": result["popularity"]
             })
 
         return relatedList
@@ -130,6 +132,56 @@ def lookupRelatedMovies(id):
         return None
     finally:
         return relatedList
+
+
+def lookupRelatedTv(id):
+    try:
+        # retrieve api_key
+        api_key = configuration.API_KEY_STORAGE
+        response = requests.get(
+            f"https://api.themoviedb.org/3/tv/{id}/similar?api_key={api_key}&language=en-US&page=1")
+        response.raise_for_status()
+    except requests.RequestException:
+        return None
+        # Parse response
+    try:
+        # jsonify response
+        shows = response.json()['results']
+        relatedList = []
+        # for each result - store their data in a new list
+        for result in shows:
+            cover = result["poster_path"]
+            # create an object and add it to our results list
+            relatedList.append({
+                "name": result["original_name"],
+                "id": result["id"],
+                "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}',
+                "mediaType": "tv",
+                "popularity": result["popularity"]
+            })
+
+        return relatedList
+    except (KeyError, TypeError, ValueError):
+        return None
+    finally:
+        return relatedList
+
+
+def lookupRelated(id):
+    movies = lookupRelatedMovies(id)
+    tv = lookupRelatedTv(id)
+    related = []
+    if movies is not None:
+        for movie in movies:
+            related.append(movie)
+    if tv is not None:
+        for show in tv:
+            related.append(show)
+
+    def sort(e):
+        return e['popularity']
+    related.sort(reverse=False, key=sort)
+    return related
 
 
 def lookupUpcoming(page=1):
@@ -211,7 +263,8 @@ def lookupPopular(page=1):
                 "release": release_year,
                 "full_release": release_date,
                 "rating": result["vote_average"],
-                "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}'
+                "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}',
+                "type": "movie"
             })
 
             def sort(e):
@@ -295,6 +348,48 @@ def lookupCast(id):
         return creditsList
 
 
+def lookupTvCast(id):
+    try:
+        # retrieve api_key
+        api_key = configuration.API_KEY_STORAGE
+        response = requests.get(
+            f"https://api.themoviedb.org/3/tv/{id}/credits?api_key={api_key}&language=en-US")
+        response.raise_for_status()
+    except requests.RequestException:
+        return None
+        # Parse response
+    try:
+
+        # jsonify response
+        cast = response.json()['cast']
+        # Create cast list
+        if cast != []:
+            castList = []
+            for i in range(len(cast)):
+                picPath = cast[i]['profile_path']
+                character = cast[i]['character']
+                if picPath is None:
+                    picPath = 'None'
+                if character == '':
+                    character = 'None'
+                castList.append({
+                    "id": cast[i]['id'],
+                    "name": cast[i]['name'],
+                    "picture": f'https://www.themoviedb.org/t/p/original{picPath}',
+                    "character": character
+                })
+
+        if cast == []:
+            castList = 'N/A'
+
+        # return
+        return castList
+    except (KeyError, TypeError, ValueError):
+        return None
+    finally:
+        return castList
+
+
 def lookupPersonMovies(id):
     # Contact API
     try:
@@ -316,11 +411,11 @@ def lookupPersonMovies(id):
         for result in search:
             cover = result["poster_path"]
             if 'release_date' not in result:
-                release_year = 'Unknown'
-                date_obj = 'Unknown'
+                release_year = 'TBA'
+                date_obj = 'TBA'
             elif result["release_date"] == '' or result["release_date"] is None:
-                release_year = 'Unknown'
-                date_obj = 'Unknown'
+                release_year = 'TBA'
+                date_obj = 'TBA'
             else:
                 # parse release date info
                 date_obj = datetime.strptime(
@@ -369,13 +464,13 @@ def lookupPersonProfile(id):
         profilePic = movies["profile_path"]
 
         if "birthday" not in movies:
-            birthday = 'Unknown'
-            date_obj = 'Unknown'
-            age = 'Unknown'
+            birthday = 'TBA'
+            date_obj = 'TBA'
+            age = 'TBA'
         elif movies["birthday"] == '' or movies["birthday"] is None:
-            birthday = 'Unknown'
-            date_obj = 'Unknown'
-            age = 'Unknown'
+            birthday = 'TBA'
+            date_obj = 'TBA'
+            age = 'TBA'
         else:
             # parse release date info
             date_obj = datetime.strptime(
@@ -406,6 +501,46 @@ def lookupPersonProfile(id):
         return results
 
 
+def lookupPersonName(name, page=1):
+    # Contact API
+    try:
+        # retrieve api_key
+        api_key = configuration.API_KEY_STORAGE
+        response = requests.get(
+            f"https://api.themoviedb.org/3/search/person?api_key={api_key}&language=en-US&query={name}&page={page}")
+        response.raise_for_status()
+    except requests.RequestException:
+        return None
+        # Parse response
+    try:
+        # jsonify response
+        movies = response.json()
+        # initialize result list
+        results = []
+        search = movies['results']
+        # for each result - store their data in a new list
+        for result in search:
+            profilePic = result["profile_path"]
+            # create an object and add it to our results list
+            results.append({
+                "name": result["name"],
+                "id": result["id"],
+                "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{profilePic}',
+                "popularity": result["popularity"]
+            })
+
+            def sort(e):
+                return e['popularity']
+
+            results.sort(reverse=True, key=sort)
+
+        return results
+    except (KeyError, TypeError, ValueError):
+        return None
+    finally:
+        return results
+
+
 def lookup(movie, page=1):
     # Contact API
     try:
@@ -427,11 +562,11 @@ def lookup(movie, page=1):
         for result in search:
             cover = result["poster_path"]
             if 'release_date' not in result:
-                release_year = 'Unknown'
-                date_obj = 'Unknown'
+                release_year = 'TBA'
+                date_obj = 'TBA'
             elif result["release_date"] == '' or result["release_date"] is None:
-                release_year = 'Unknown'
-                date_obj = 'Unknown'
+                release_year = 'TBA'
+                date_obj = 'TBA'
             else:
                 # parse release date info
                 date_obj = datetime.strptime(
@@ -466,7 +601,7 @@ def lookupGenre(genre, page=1):
         # retrieve api_key
         api_key = configuration.API_KEY_STORAGE
         response = requests.get(
-            f"https://api.themoviedb.org/3/discover/movie?api_key={api_key}&language=en-US&region=US&sort_by=popularity.desc&include_adult=false&include_video=false&with_genres={genre}")
+            f"https://api.themoviedb.org/3/discover/movie?api_key={api_key}&language=en-US&region=US&sort_by=popularity.desc&include_adult=false&include_video=false&with_genres={genre}&page={page}")
         response.raise_for_status()
     except requests.RequestException:
         return None
@@ -481,11 +616,11 @@ def lookupGenre(genre, page=1):
         for result in search:
             cover = result["poster_path"]
             if 'release_date' not in result:
-                release_year = 'Unknown'
-                date_obj = 'Unknown'
+                release_year = 'TBA'
+                date_obj = 'TBA'
             elif result["release_date"] == '' or result["release_date"] is None:
-                release_year = 'Unknown'
-                date_obj = 'Unknown'
+                release_year = 'TBA'
+                date_obj = 'TBA'
             else:
                 # parse release date info
                 date_obj = datetime.strptime(
@@ -513,43 +648,112 @@ def lookupGenre(genre, page=1):
     finally:
         return results
 
+
+def lookupTvGenre(genre, page=1):
+    # Contact API
+    try:
+        # retrieve api_key
+        api_key = configuration.API_KEY_STORAGE
+        response = requests.get(
+            f"https://api.themoviedb.org/3/discover/tv?api_key={api_key}&language=en-US&region=US&sort_by=popularity.desc&include_adult=false&include_video=false&with_genres={genre}&page={page}")
+        response.raise_for_status()
+    except requests.RequestException:
+        return None
+        # Parse response
+    try:
+        # jsonify response
+        shows = response.json()
+        # initialize result list
+        results = []
+        search = shows['results']
+        # for each result - store their data in a new list
+        for result in search:
+            cover = result["poster_path"]
+            if 'first_air_date' not in result:
+                release_year = 'TBA'
+                date_obj = 'TBA'
+            elif result["first_air_date"] == '' or result["first_air_date"] is None:
+                release_year = 'TBA'
+                date_obj = 'TBA'
+            else:
+                # parse release date info
+                date_obj = datetime.strptime(
+                    result["first_air_date"], '%Y-%m-%d')
+                release_year = date_obj.strftime('%Y')
+                release_date = date_obj.strftime('%B %d, %Y')
+            # create an object and add it to our results list
+            results.append({
+                "name": result["original_name"],
+                "id": result["id"],
+                "release": release_year,
+                "full_release": date_obj,
+                "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}',
+                "rating": result["vote_average"],
+                "mediaType": "tv"
+            })
+
+            def sort(e):
+                return e['release']
+
+            results.sort(reverse=True, key=sort)
+
+        return results
+    except (KeyError, TypeError, ValueError):
+        return None
+    finally:
+        return results
+
 # -------------------------------------------- TODO -----------------------------------------------------------------------------
-# def lookupTv(title):
-#     # Contact API
-#     try:
-#         # retrieve api_key
-#         api_key = configuration.API_KEY_STORAGE
-#         response = requests.get(
-#             f"https://api.themoviedb.org/3/search/tv?api_key={api_key}&language=en-US&page=1&query={title}&include_adult=false")
-#         response.raise_for_status()
-#     except requests.RequestException:
-#         return None
-#         # Parse response
-#     try:
-#         # jsonify response
-#         shows = response.json()
-#         # initialize result list
-#         results = []
-#         search = shows['results']
-#         # for each result - store their data in a new list
-#         for result in search:
-#             cover = result["poster_path"]
-#             # parse release date info
-#             date_obj = datetime.strptime(result["release_date"], '%Y-%m-%d')
-#             release_year = date_obj.strftime('%Y')
-#             release_date = date_obj.strftime('%B %d, %Y')
-#             # create an object and add it to our results list
-#             results.append({
-#                 "name": result["original_title"],
-#                 "id": result["id"],
-#                 "release": release_year,
-#                 "full_release": result["release_date"]
-#             })
-#         return results
-#     except (KeyError, TypeError, ValueError):
-#         return None
-#     finally:
-#         return results
+
+
+def lookupTv(title, page=1):
+    # Contact API
+    try:
+        # retrieve api_key
+        api_key = configuration.API_KEY_STORAGE
+        response = requests.get(
+            f"https://api.themoviedb.org/3/search/tv?api_key={api_key}&query={title}&language=en-US&page={page}&include_adult=false")
+        response.raise_for_status()
+    except requests.RequestException:
+        return None
+        # Parse response
+    try:
+        # jsonify response
+        shows = response.json()
+        # initialize result list
+        results = []
+        search = shows['results']
+        # for each result - store their data in a new list
+        for result in search:
+            cover = result["poster_path"]
+            # parse release date info
+            if "first_air_date" not in result:
+                release_year = 'TBA'
+                date_obj = 'TBA'
+            elif result["first_air_date"] == '' or result["first_air_date"] is None:
+                release_year = 'TBA'
+                date_obj = 'TBA'
+            else:
+                # parse release date info
+                date_obj = datetime.strptime(
+                    result["first_air_date"], '%Y-%m-%d')
+                release_year = date_obj.strftime('%Y')
+                release_date = date_obj.strftime('%B %d, %Y')
+            # create an object and add it to our results list
+            results.append({
+                "name": result["original_name"],
+                "id": result["id"],
+                "release": release_year,
+                "full_release": result["first_air_date"],
+                "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}',
+                "rating": result["vote_average"],
+                "type": "tv"
+            })
+        return results
+    except (KeyError, TypeError, ValueError):
+        return None
+    finally:
+        return results
 
 # function to lookup movies by id
 
@@ -618,6 +822,60 @@ def lookupById(id):
             "genres": movies["genres"],
             "director": credits['crew'],
             "cast": credits['cast']
+        })
+        return results
+    except (KeyError, TypeError, ValueError):
+        return None
+    finally:
+        return results
+
+
+def lookupTvById(id):
+    try:
+        # retrieve api_key
+        api_key = configuration.API_KEY_STORAGE
+        response = requests.get(
+            f"https://api.themoviedb.org/3/tv/{id}?api_key={api_key}&language=en-US&region=CA")
+        response.raise_for_status()
+    except requests.RequestException:
+        return None
+        # Parse response
+    try:
+        # jsonify response
+        shows = response.json()
+        cast = lookupTvCast(id)
+        # initialize result list
+        results = []
+        creators = []
+        genres = []
+        # pre-set cover to be used in f string
+        cover = shows["poster_path"]
+        # parse release date info
+        # THIS NEEDS WORK CLEARLY
+        if shows["first_air_date"] == '' or "first_air_date" not in shows:
+            date_obj = datetime.now()
+            release_year = 'N/A'
+            release_date = 'N/A'
+        else:
+            date_obj = datetime.strptime(
+                shows["first_air_date"], '%Y-%m-%d')
+            release_year = date_obj.strftime('%Y')
+            release_date = date_obj.strftime('%B %d, %Y')
+            # create an object and add it to our results list
+        results.append({
+            "name": shows["name"],
+            "id": shows["id"],
+            "release_year": release_year,
+            "release_full": release_date,
+            "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}',
+            "rating": shows["vote_average"],
+            "status": shows["status"],
+            "overview": shows["overview"],
+            "genres": shows["genres"],
+            "cast": cast,
+            "creators": shows['created_by'],
+            "episodes": shows["number_of_episodes"],
+            "seasons": shows["number_of_seasons"]
         })
         return results
     except (KeyError, TypeError, ValueError):

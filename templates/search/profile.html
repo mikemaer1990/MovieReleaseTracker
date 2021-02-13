@@ -31,12 +31,14 @@
     </p>
   </section>
 
-  <section class="profileLinks outsetBorderWhite">
-    <div class="d-flex">
+  <section class="profileLinks outsetBorderWhite p-1 text-left">
+    <div class="d-block">
       {% if item['imdb'] != None %}
-      <a class="my-1 mx-auto" href="https://www.imdb.com/title/{{item['imdb']}}" target="_blank"><img alt="IMDB Image"
-          class="imdbImage" src="../../static/imdb.svg"></a>
+      <a class="my-1 me-2 d-block" href="https://www.imdb.com/title/{{item['imdb']}}" target="_blank"><img
+          alt="IMDB Image" class="imdbImage" src="../../static/imdb.svg"></a>
       {% endif %}
+      <a class="mt-1" href="{{ url_for('peoplemovies', id=item['id']) }}"><button type="button"
+          class="btn btn-dark mb-1 px-3">Filmography</button></a>
     </div>
   </section>
 
@@ -93,7 +95,7 @@
     <section class="profileRelated outsetBorderWhite p-0 d-flex justify-content-start" id="profileRelated">
       {% for movie in movies %}
       <div class="profileRelatedMovieCover pe-1">
-        <a href="{{ url_for('details', id=movie['id']) }}">
+        <a href="{{ url_for('details', id=movie['id'], mediaType='movie') }}">
           {% if movie['cover'] == 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None' %}
           <img src="{{ url_for('static', filename='err_img.gif') }}" alt="movie poster">
           {% else %}

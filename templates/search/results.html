@@ -9,8 +9,13 @@
 <div class="resultsContainer mt-5 no-gutters p-md-5 p-sm-2">
     <div class="row no-gutters justify-content-center">
         {% for item in results %}
-        {% set url = url_for('details', id=item['id'])%}
-        <div onclick="location.href='{{url}}';" id="movieContainer" class="text-center col col-xl-2 col-lg-3 col-md-4 col-sm-5 col-12 mx-md-4 mx-sm-3 mb-md-5 mb-sm-4 mb-2">
+        {% if item['type'] == 'tv'%}
+        {% set url = url_for('details', id=item['id'], mediaType='tv')%}
+        {% else %}
+        {% set url = url_for('details', id=item['id'], mediaType='movie')%}
+        {% endif %}
+        <div onclick="location.href='{{url}}';" id="movieContainer"
+            class="text-center col col-xl-2 col-lg-3 col-md-4 col-sm-5 col-12 mx-md-4 mx-sm-3 mb-md-5 mb-sm-4 mb-2">
             <div class="titleYear">
                 <p class="m-0">{{item['name']}}</p>
                 <p class="m-0 mb-1">({{item['release']}})</p>
@@ -26,34 +31,35 @@
             {% else %}
             <p class="movieRating">Rating: {{item['rating']}}</p>
             {% endif %}
-            <form method="post">
-                <div class="btn-group btnGroup">
-                    {% if g.user %}
-                    <form method="post"><button type="submit" name="movie_id" id="details_login_button" value="{{item['id']}}" class="btn btn-outline-danger mb-1"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                        fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z" />
-                      </svg></button>
-                    </form>
-                    {% else %}
-                    <a href="{{ url_for('login')}}"><button type="button" id="details_login_button"
-                            class="btn btn-dark mb-1">Login</button></a>
-                    {% endif %}
-                        <a href="{{ url_for('details', id=item['id']) }}"><button type="button"
-                            id="details_button" class="btn btn-dark mb-1">Details</button></a>
-                </div>
-            </form>
+            <div class="btn-group btnGroup">
+                {% if g.user %}
+                <form method="post">
+                    <button type="submit" name="movie_id" id="details_login_button" value="{{item['id']}}"
+                        class="btn btn-outline-danger mb-1"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+                            height="16" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd"
+                                d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z" />
+                        </svg></button>
+                </form>
+                {% else %}
+                <a href="{{ url_for('login')}}"><button type="button" id="details_login_button"
+                        class="btn btn-dark mb-1">Login</button></a>
+                {% endif %}
+                <a href="{{ url }}"><button type="button" id="details_button"
+                        class="btn btn-dark mb-1">Details</button></a>
+            </div>
         </div>
         {% endfor %}
         <div class="d-flex justify-content-center">
             {% if page > 1 %}
             <a href="{{ url_for('results', query=query, page=page-1) }}"><button type="button" class="btn btn-dark"
-                id="details_button" class="btn btn-dark mb-1">Prev Page</button></a>
+                    id="details_button" class="btn btn-dark mb-1">Prev Page</button></a>
             {% endif %}
             {% if page < pageCount %}
             <a href="{{ url_for('results', query=query, page=page+1) }}"><button type="button" class="btn btn-dark"
-            id="details_button" class="btn btn-dark mb-1">Next Page</button></a>
+                    id="details_button" class="btn btn-dark mb-1">Next Page</button></a>
             {% endif %}
         </div>
     </div>
 
-{% endblock %}
+    {% endblock %}
