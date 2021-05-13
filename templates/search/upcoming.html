@@ -34,11 +34,11 @@
                             </svg></button>
                     </form>
                     {% else %}
-                    <a href="{{ url_for('login')}}"><button type="button" id="details_login_button"
-                            class="btn btn-dark mb-1">Login</button></a>
+                    <a class="details_login_link" href="{{ url_for('login')}}"><button type="button"
+                            id="details_login_button" class="btn btn-outline-dark mb-1">Login</button></a>
                     {% endif %}
-                    <a href="{{ url_for('details', id=item['id'], mediaType='movie') }}"><button type="button"
-                            id="details_button" class="btn btn-dark mb-1">Details</button></a>
+                    <a class="details_link" href="{{ url_for('details', id=item['id'], mediaType='movie') }}"><button
+                            type="button" id="details_button" class="btn btn-dark mb-1">Details</button></a>
                 </div>
             </form>
         </div>
@@ -54,5 +54,5 @@
             {% endif %}
         </div>
     </div>
-
+    <script src="{{ url_for('static', filename='javascripts/movieResults.js') }}"></script>
     {% endblock %}

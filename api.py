@@ -126,8 +126,8 @@ def lookupRelatedMovies(id):
                 "mediaType": "movie",
                 "popularity": result["popularity"]
             })
-
         return relatedList
+        
     except (KeyError, TypeError, ValueError):
         return None
     finally:
@@ -594,7 +594,6 @@ def lookup(movie, page=1):
     finally:
         return results
 
-
 def lookupGenre(genre, page=1):
     # Contact API
     try:
@@ -775,6 +774,7 @@ def lookupById(id):
         results = []
         # pre-set cover to be used in f string
         cover = movies["poster_path"]
+        backdrop = movies["backdrop_path"]
         # parse release date info
         release = lookupReleaseDate(movies['id'])
         trailer = lookupTrailer(id)
@@ -782,12 +782,12 @@ def lookupById(id):
         # THIS NEEDS WORK CLEARLY
         if movies["release_date"] == '':
             date_obj = datetime.now()
-            release_year = 'N/A'
+            # release_year = 'N/A'
             release_date = 'N/A'
         elif release['digital']['full'] == 'TBA' and release['theatre']['full'] == 'TBA' or not release['digital']['full'] and not release['theatre']['full']:
             date_obj = datetime.strptime(
                 movies["release_date"], '%Y-%m-%d')
-            release_year = date_obj.strftime('%Y')
+            # release_year = date_obj.strftime('%Y')
             release_date = date_obj.strftime('%B %d, %Y')
         elif release['digital']['full'] == 'TBA':
             release_date = release['theatre']['full']
@@ -811,6 +811,7 @@ def lookupById(id):
         results.append({
             "name": movies["original_title"],
             "id": movies["id"],
+            "release_obj" : release,
             "release_small": date_obj.date(),
             "release_full": release_date,
             "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}',
@@ -821,7 +822,8 @@ def lookupById(id):
             "overview": movies["overview"],
             "genres": movies["genres"],
             "director": credits['crew'],
-            "cast": credits['cast']
+            "cast": credits['cast'],
+            "backdrop": f'http://image.tmdb.org/t/p/w1920_and_h1080_multi_faces{backdrop}'
         })
         return results
     except (KeyError, TypeError, ValueError):
@@ -846,8 +848,8 @@ def lookupTvById(id):
         cast = lookupTvCast(id)
         # initialize result list
         results = []
-        creators = []
-        genres = []
+        # creators = []
+        # genres = []
         # pre-set cover to be used in f string
         cover = shows["poster_path"]
         # parse release date info

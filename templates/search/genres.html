@@ -41,7 +41,7 @@
                 </form>
                 {% elif not g.user %}
                 <a href="{{ url_for('login')}}"><button type="button" id="details_login_button"
-                        class="btn btn-dark mb-1">Login</button></a>
+                        class="btn btn-outline-dark mb-1">Login</button></a>
                 {% endif %}
                 <a href="{{ url }}"><button type="button" id="details_button"
                         class="btn btn-dark mb-1">Details</button></a>
@@ -61,5 +61,5 @@
             {% endif %}
         </div>
     </div>
-
+    <script src="{{ url_for('static', filename='javascripts/movieResults.js') }}"></script>
     {% endblock %}

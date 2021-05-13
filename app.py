@@ -376,9 +376,11 @@ def details(id, mediaType):
     if mediaType == 'tv':
         movie = lookupTvById(id)
         related = lookupRelated(id)
+        bg = None
     else:
         movie = lookupById(id)
         related = lookupRelated(id)
+        bg = movie[0]['backdrop']
     # if get - then get api information and pass that to the template
     if request.method == 'GET':
         if movie[0]['release_full'] == 'N/A':
@@ -388,7 +390,7 @@ def details(id, mediaType):
             date_obj = datetime.strptime(movie[0]['release_full'], '%B %d, %Y')
             release_year = date_obj.strftime('%Y')
             release = movie[0]['release_full']
-        return render_template('search/details.html', details=movie, release=release, year=release_year, related=related, mediaType=mediaType)
+        return render_template('search/details.html', details=movie, release=release, year=release_year, related=related, mediaType=mediaType, bg = bg)
     # else if they click the follow button
     elif request.method == 'POST':
         movie = lookupById(id)[0]
@@ -438,6 +440,7 @@ def tvresults():
 def schedule():
     if request.method == 'GET':
         check_db()
+        update_release_dates()
         return render_template('search/schedule.html')
 
 # register route
@@ -608,8 +611,22 @@ def logout():
     session.clear()
     return redirect(url_for('index'))
 
-# function to go over database and find any movie that releases on 'todays' date
+# Function to make sure release dates are accurate
 
+def update_release_dates():
+    releases = db.session.query(Follows).all()
+    for release in releases:
+        database_id = release.movie_id
+        database_date = release.movie_date
+        updated_info = lookupReleaseDate(database_id)
+        if database_date != updated_info['digital']['small'] and updated_info['digital']['small'] != 'TBA':
+            if (database_date) != updated_info['theatre']['small'] and updated_info['theatre']['small'] != 'TBA':
+                release.movie_date = updated_info['theatre']['small']
+            elif updated_info['digital']['small'] != 'TBA':
+                release.movie_date = updated_info['digital']['small']
+            db.session.commit()
+
+# function to go over database and find any movie that releases on 'todays' date
 
 def check_db():
     # store todays date value
@@ -638,6 +655,7 @@ def check_db():
             except:
                 print('Email Error')
 
+# Forgot password route
 
 @ app.route('/auth/forgot', methods=('GET', 'POST'))
 def forgot():

@@ -710,9 +710,9 @@
               <button type="submit" id="" class="btn btn-dark">Search</button>
             </div>
             <input id="searchBarInput" class="col-sm-12 form-control" type="text" placeholder="Search"
-              aria-label="Search" name="query" required>
+              aria-label="Search" name="query" required autocomplete="off">
             <select class="form-select indexSelect mr-sm-2 text-center mb-2" name="query_type" id="movie_title">
-              <option selected value="1">Movies</option>
+              <option class="pt-1" selected value="1">Movies</option>
               <option value="2">TV</option>
               <option value="3">People</option>
             </select>
@@ -733,15 +733,58 @@
         <li class="nav-item dropdown px-2">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
             aria-expanded="false">
-            Dropdown
+            More
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
             <li><a class="dropdown-item" href="{{ url_for('popular') }}">Popular</a></li>
-            <li><a class="dropdown-item" href="#">Genre</a></li>
-            <li>
-              <hr class="dropdown-divider">
+            <li><a class="dropdown-item" href="#">Movies By Genre &raquo;</a>
+              <ul class="dropdown-menu dropdown-submenu">
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=28, genrename='Action', mediaType='movie') }}">Action</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=12, genrename='Adventure', mediaType='movie') }}">Adventure</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=16, genrename='Animation', mediaType='movie') }}">Animation</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=35, genrename='Comedy', mediaType='movie') }}">Comedy</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=80, genrename='Crime', mediaType='movie') }}">Crime</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=99, genrename='Documentary', mediaType='movie') }}">Documentary</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=18, genrename='Drama', mediaType='movie') }}">Drama</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=36, genrename='History', mediaType='movie') }}">History</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=27, genrename='Horror', mediaType='movie') }}">Horror</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=9648, genrename='Mystery', mediaType='movie') }}">Mystery</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=53, genrename='Thriller', mediaType='movie') }}">Thriller</a>
+                </li>
+              </ul>
             </li>
-            <li><a class="dropdown-item" href="#">TBA</a></li>
           </ul>
         </li>
       </ul>
@@ -750,8 +793,9 @@
       <div class="ms-auto me-2 d-flex" id="navbarSupportedContent">
         <ul class="navbar-nav mt-2 mt-lg-0">
           {% if g.user %}
-          <li class="nav-item mt-2 me-2"><span class="text-capitalize">{{ g.user.username }}</span>
-          <li class="nav-item mt-2 mx-1 text-primary"><a href="{{ url_for('logout') }}">Log Out</a>
+          <li class="nav-item mt-2 me-2"><span class="">{{ g.user.username }}</span>
+          <li class="nav-item mt-1 mx-1 text-primary power-button"><a href="{{ url_for('logout') }}"><img
+                src="{{ url_for('static', filename='power.png') }}" alt="power icon" width="20" height="20"></a>
             {% else %}
           <li class="nav-item"><a class="nav-link" href="{{ url_for('login')}}">Login</a></li>
           <li class="nav-item mr-2"><a class="nav-link" href="{{ url_for('register')}}">Register</a></li>
