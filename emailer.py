@@ -53,3 +53,31 @@ def send_reset_mail(recipients, reset_token, link):
     server.login(configuration.EMAIL_USERNAME, configuration.EMAIL_PASSWORD)
     server.send_message(msg)
     server.quit()
+
+def send_confirmation_email(to, confirm_url):
+    # set values for the smtplib sendmail function
+    smtp_server = 'smtp.gmail.com'
+    port = 587
+    from_email = 'Movie Release Tracker <MovieReleaseTracker@Gmail>'
+    confirm_url = confirm_url
+    message = f'<p>Welcome! Thanks for signing up. Please follow this link to activate your account:</p>\
+                <p><a href="{ confirm_url }">{ confirm_url }</a></p>\
+                <br>\
+                <p>Cheers! 🍻</p>'
+
+    # msg sections - add html as a second argument to chg to html
+    msg = MIMEText(message, 'html')
+    msg['From'] = from_email
+    msg['To'] = to
+    msg['Subject'] = 'MovieReleaseTracker Email Confirmation'
+
+    # set up connection
+    server = smtplib.SMTP(smtp_server, port)
+    server.ehlo()
+    server.starttls()
+    
+    # login and send mail
+    server.login(configuration.EMAIL_USERNAME, configuration.EMAIL_PASSWORD)
+    server.send_message(msg)
+    server.quit()
+

@@ -10,3 +10,13 @@ def login_required(view):
 
         return view(**kwargs)
     return wrapped_view
+
+def check_confirmed(func):
+    @functools.wraps(func)
+    def decorated_function(*args, **kwargs):
+        if g.user.confirmed is False:
+            flash('Please confirm your account!', 'warning')
+            return redirect(url_for('unconfirmed'))
+        return func(*args, **kwargs)
+
+    return decorated_function

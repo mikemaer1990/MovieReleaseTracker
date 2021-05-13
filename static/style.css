@@ -2,6 +2,7 @@
   --main-gray: #1c1f23;
   --main-white: #fff;
   --main-font: black;
+  --main-hover-gray: #15171a;
 }
 html {
   height: 100vh;
@@ -33,6 +34,13 @@ form a:link {
 
 form a {
   color: rgb(242, 243, 234);
+}
+.btn-dark {
+  background-color: var(--main-gray);
+  transition: all 0.25s ease;
+}
+.btn-dark:hover {
+  background-color: var(--main-hover-gray);
 }
 .input-group select {
   background-color: var(--main-gray);
@@ -82,6 +90,16 @@ div.outsetBorderWhite {
 .formTop {
   position: relative;
   top: -5%;
+}
+.unconfirmed-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  height: 100%;
+  margin: 5rem auto;
+  text-align: center;
 }
 
 .btn-circle {
@@ -452,7 +470,8 @@ input[type="select"]:target {
 }
 
 .indexSelect {
-  max-width: 30%;
+  text-align: center;
+  max-width: 100px;
 }
 #search_button {
   min-width: 50%;
@@ -460,7 +479,7 @@ input[type="select"]:target {
   transition: all 0.25s;
 }
 #search_button:hover {
-  background-color: #15171a;
+  background-color: var(--main-hover-gray);
 }
 
 #resultsContainer {

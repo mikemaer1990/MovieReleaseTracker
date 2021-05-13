@@ -8,10 +8,11 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask import flash, g, redirect, render_template, request, url_for, session
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from itsdangerous import URLSafeTimedSerializer
 from werkzeug.security import generate_password_hash, check_password_hash
 from api import lookup, lookupById, lookupTvById, lookupReleaseDate, lookupTrailer, lookupCast, lookupRelated, lookupRelatedMovies, lookupRelatedTv, lookupTv, lookupUpcoming, lookupPopular, lookupPersonMovies, lookupPersonProfile, lookupPersonName, lookupGenre, lookupTvGenre
-from utilities import login_required
-from emailer import send_release_mail, send_reset_mail
+from utilities import login_required, check_confirmed
+from emailer import send_release_mail, send_reset_mail, send_confirmation_email
 from datetime import datetime
 
 # define our flask app
@@ -40,7 +41,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(255))
-
+    confirmed = db.Column(db.Boolean, default=False)
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(app.config['SECRET_KEY'], expires_sec)
         return s.dumps({'user_id': self.id}).decode('utf8')
@@ -54,9 +55,10 @@ class User(db.Model):
             return None
         return User.query.get(user_id)
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, confirmed):
         self.username = username
         self.password = password
+        self.confirmed = confirmed
 
 
 class Follows(db.Model):
@@ -74,7 +76,6 @@ class Follows(db.Model):
         self.movie_date = movie_date
 
 # main page route
-
 
 @app.route('/', methods=('GET', 'POST'))
 def index():
@@ -102,7 +103,6 @@ def index():
     return render_template('dashboard/index.html', home=True)
 
 # results route - takes one argument which is the query string
-
 
 @app.route('/results', methods=('GET', 'POST'))
 def results():
@@ -478,16 +478,19 @@ def register():
             error = 'Password must contain (one number / one uppercase / one lowercase / one special symbol (@$!%*#?&-_) / be between 6-20 characters'
         # if no errors then insert user into database
         if error is None:
-            insert_user = User(username, generate_password_hash(password))
+            insert_user = User(username, generate_password_hash(password), confirmed=False)
             db.session.add(insert_user)
             db.session.commit()
+            token = generate_confirmation_token(username)
+            confirm_url = url_for('confirm_email', token=token, _external=True)
+            send_confirmation_email(username, confirm_url)
             # flash success message
             user = User.query.filter_by(username=username).first()
             session.clear()
             session['user_id'] = user.id
             # redirect to home page
-            flash('Now Registered As: {}! Welcome.'.format(username))
-            return redirect(url_for('index'))
+            flash('Now Registered As: {}! Welcome. Please confirm your email.'.format(username))
+            return redirect(url_for('unconfirmed'))
         # flash any errors
         flash(error)
     # if get then render template
@@ -510,6 +513,8 @@ def login():
         if user and check_password_hash(user.password, password) == True:
             session.clear()
             session['user_id'] = user.id
+            if user.confirmed == False:
+                flash('Please confirm your email')
             # redirect to home page
             return redirect(url_for('index'))
         # parse for errors and set error message accordingly
@@ -532,6 +537,7 @@ def login():
 @ app.route('/user/follows', methods=('GET', 'POST'))
 # ensure user is logged in
 @ login_required
+@ check_confirmed
 def follows():
     # grab users follows from the database and arrange them in order by release date
     if request.method == 'GET':
@@ -717,6 +723,60 @@ def reset(token):
         flash(error)
     # if get then render template
     return render_template('auth/reset.html')
-# testing run
-# if __name__ == '__main__':
-#     app.run()
+
+# Confirmation email page
+
+@ app.route('/auth/confirm/<token>')
+@ login_required
+def confirm_email(token):
+    try:
+        email = confirm_token(token)
+    except:
+        flash('Confirmation link is invalid or expired.', 'danger')
+    user = db.session.query(User).filter(User.username == email).first()
+    if user.confirmed:
+        flash('Account already confirmed, please login.', 'success')
+    else:
+        user.confirmed = True
+        db.session.commit()
+        session.clear()
+        session['user_id'] = user.id
+        return redirect(url_for('index'))
+
+# Resend confirmation email
+@ app.route('/auth/resend')
+@ login_required
+def resend_confirmation():
+    token = generate_confirmation_token(g.user.username)
+    confirm_url = url_for('confirm_email', token=token, _external=True)
+    send_confirmation_email(g.user.username, confirm_url)
+    flash('A new confirmation email has been sent.', 'success')
+    return redirect(url_for('unconfirmed'))
+
+# Unconfirmed email pageCount
+@ app.route('/auth/unconfirmed')
+@ login_required
+def unconfirmed():
+    if g.user.confirmed:
+        return redirect(url_for('index'))
+    return render_template('auth/unconfirmed.html')
+# Email confirmation functions
+
+def generate_confirmation_token(email):
+    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    return serializer.dumps(email, salt = app.config['SECRET_KEY'])
+
+def confirm_token(token, expiration=3600):
+    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    try:
+        email = serializer.loads(
+            token,
+            salt = app.config['SECRET_KEY'],
+            max_age = expiration
+        )
+    except:
+        return False
+    return email
+
+
+
