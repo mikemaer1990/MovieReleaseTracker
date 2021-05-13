@@ -6,7 +6,7 @@
 {% block content %}
 {% if bg != None %}
 <div class="details-backdrop"
-  style="background: center center / cover no-repeat url('{{bg}}'); min-height: 100%; border-top:5px outset var(--main-gray);">
+  style="background: center center / cover no-repeat url('{{bg}}'); border-top:5px outset var(--main-gray);">
   {% endif %}
   {% for item in details %}
   <div class="detailsBG">
@@ -48,7 +48,7 @@
         </h3>
 
         <p class="mb-0 d-inl">Directed By:
-          {% if item['director'] %}
+          {% if item['director'] and item['director'][0]['id']%}
           <a href="{{ url_for('profile', id=item['director'][0]['id'])}}">
             <span class="boldText">{{ item['director'][0]['name'] }}</span>
           </a>
@@ -171,7 +171,7 @@
             {% if movie['cover'] == 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None' %}
             <img src="{{ url_for('static', filename='err_img.gif') }}" alt="movie poster">
             {% else %}
-            <img src="{{ movie['cover'] }}" alt="movie poster">
+            <img src="{{ movie['cover'] }}" alt="movie poster" title="{{ movie['name'] }}">
             {% endif %}
           </a>
         </div>

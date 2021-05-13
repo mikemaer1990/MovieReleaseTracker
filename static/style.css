@@ -3,6 +3,8 @@
   --main-white: #fff;
   --main-font: black;
   --main-hover-gray: #15171a;
+  --navbar-height: 66px;
+  --navbar-mobile-height: 57.22px;
 }
 html {
   height: 100vh;
@@ -133,8 +135,8 @@ section .details h3 {
   color: var(--main-font);
 }
 .details-backdrop {
-  padding: 2rem 0;
-  min-height: 100vh !important;
+  padding: 1.5rem 0 1rem 0;
+  min-height: calc(100vh - 66px) !important;
 }
 
 .related {
@@ -714,7 +716,10 @@ svg:hover #flap {
   }
 }
 
-@media only screen and (max-width: 990px) {
+@media only screen and (max-width: 992px) {
+  .details-backdrop {
+    min-height: calc(100vh - var(--navbar-mobile-height)) !important;
+  }
   .dropdown-menu .dropdown-submenu {
     position: absolute;
     left: 0;
@@ -852,6 +857,9 @@ svg:hover #flap {
       border: none !important;
       width: 100%;
       height: 100%;
+    }
+    .unconfirmed-wrapper {
+      width: 80%;
     }
   }
 

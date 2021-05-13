@@ -55,11 +55,11 @@
         <div class="d-flex justify-content-center">
             {% if page > 1 %}
             <a href="{{ url_for('popular', page=page-1) }}"><button type="button" class="btn btn-dark"
-                    id="details_button" class="btn btn-dark mb-1">Prev Page</button></a>
+                    class="btn btn-dark mb-1 me-5">Prev Page</button></a>
             {% endif %}
             {% if page < pageCount %}
             <a href="{{ url_for('popular', page=page+1) }}"><button type="button" class="btn btn-dark"
-                    id="details_button" class="btn btn-dark mb-1">Next Page</button></a>
+                    class="btn btn-dark mb-1">Next Page</button></a>
             {% endif %}
         </div>
     </div>
