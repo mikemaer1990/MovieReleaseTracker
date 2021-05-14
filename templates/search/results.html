@@ -14,7 +14,7 @@
         {% else %}
         {% set url = url_for('details', id=item['id'], mediaType='movie')%}
         {% endif %}
-        <div onclick="location.href='{{url}}';" id="movieContainer"
+        <div data-url="{{ url }}" id="movieContainer"
             class="text-center col col-xl-2 col-lg-3 col-md-4 col-sm-5 col-12 mx-md-4 mx-sm-3 mb-md-5 mb-sm-4 mb-2">
             <div class="titleYear">
                 <p class="m-0">{{item['name']}}</p>
@@ -32,7 +32,7 @@
             <p class="movieRating">Rating: {{item['rating']}}</p>
             {% endif %}
             <div class="btn-group btnGroup">
-                {% if g.user and item['type'] != 'tv'%}
+                {% if g.user and item['type'] != 'tv' and g.user.confirmed %}
                 <form method="post">
                     <button type="submit" name="movie_id" id="details_follow_button" value="{{item['id']}}"
                         class="btn btn-outline-danger mb-1"><svg xmlns="http://www.w3.org/2000/svg" width="16"
@@ -44,6 +44,9 @@
                 {% elif not g.user %}
                 <a href="{{ url_for('login')}}"><button type="button" id="details_login_button"
                         class="btn btn-outline-dark mb-1">Login</button></a>
+                {% elif not g.user.confirmed %}
+                <a href="{{ url_for('unconfirmed')}}"><button type="button" id="details_login_button"
+                        class="btn btn-outline-dark mb-1">Confirm</button></a>
                 {% endif %}
                 <a href="{{ url }}"><button type="button" id="details_button"
                         class="btn btn-dark mb-1">Details</button></a>

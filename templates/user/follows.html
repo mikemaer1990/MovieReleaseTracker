@@ -29,8 +29,8 @@
         {% else %}
       <tr class="bg-unreleased">
         {%endif%}
-        <td class="col-md-4">{{movie['name']}}</td>
-        <td class="col-md-4">{{movie['release']}}</td>
+        <td class="col-md-4 movie-table">{{movie['name']}}</td>
+        <td class="col-md-4 movie-table">{{movie['release']}}</td>
         <td class="col-md-2 text-center"><a href="{{ url_for('details', id=movie['id'], mediaType='movie') }}"><button
               type="button" id="details_button" class="btn btn-success mb-1">Details</button></a>
         <td class="text-center col-md-2">

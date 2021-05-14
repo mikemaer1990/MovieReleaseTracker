@@ -217,11 +217,12 @@ def lookupUpcoming(page=1):
                 "id": result["id"],
                 "release": release_year,
                 "full_release": release_date,
+                "date_obj": date_obj,
                 "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}'
             })
 
             def sort(e):
-                return e['full_release']
+                return e['date_obj']
 
             upcomingList.sort(reverse=False, key=sort)
 

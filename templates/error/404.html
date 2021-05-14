@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Access Restricted{% endblock %}
+{% block content %}
+<div class="error-wrapper">
+    <h1 class="error-header boldText">404 Error ⚠</h1>
+    <img class="error-image" src="{{ url_for('static', filename='embarrassed.png') }}" alt="404 image">
+    <br>
+    <h2>Oops! You shouldn't be here... Sorry about that 💩</h2>
+    {% if error != None %}
+    <h3>Error details: {{ error }}</h3>
+    {% endif %}
+</div>
+{% endblock %}

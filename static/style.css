@@ -103,7 +103,25 @@ div.outsetBorderWhite {
   margin: 5rem auto;
   text-align: center;
 }
-
+.error-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin: 5rem auto;
+  height: 100%;
+  width: 50%;
+  text-align: center;
+}
+.error-header {
+  margin-bottom: 1.5rem;
+}
+.error-image {
+  width: 100%;
+  max-width: 479px;
+  height: auto;
+  margin-bottom: 1rem;
+}
 .btn-circle {
   width: 40px;
   height: 40px;
@@ -112,7 +130,12 @@ div.outsetBorderWhite {
   font-size: 8px;
   text-align: center;
 }
-
+.transparent-details-bg {
+  background-color: rgba(255, 255, 255, 0.137);
+}
+.transparent-details-bg:hover {
+  background-color: rgba(255, 255, 255, 0.664);
+}
 section .details h3 {
   font-size: 1.7em;
 }
@@ -600,7 +623,12 @@ input[type="select"]:target {
 .bg-released {
   background-color: #18f50024;
 }
-
+.movie-table {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+}
 svg:hover #flap {
   -webkit-animation: flap_in 0.5s ease;
   animation: flap_in 0.5s ease;
@@ -692,6 +720,85 @@ svg:hover #flap {
   }
 }
 
+/* VIDEO LIGHTBOX STYLES */
+/* SRC: https://github.com/sricharankrishnan/click-image-play-youtube-video/blob/master/README.md */
+/* This stylesheet is exclusively for the plugin. Incase you would like to make some changes, would recommend you import this in your stylesheet and then make the changes as per your liking. */
+.videoPlayerOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1200;
+  background-color: rgba(0, 0, 0, 0.5);
+  transition-property: all;
+  -moz-transition-property: all;
+  -webkit-transition-property: all;
+  -o-transition-property: all;
+  -ms-transition-property: all;
+  transition-duration: 0.25s;
+  -webkit-transition-duration: 0.25s;
+  -ms-transition-duration: 0.25s;
+  -moz-transition-duration: 0.25s;
+  -o-transition-duration: 0.25s;
+  transition-timing-function: linear;
+  -webkit-transition-timing-function: linear;
+  -o-transition-timing-function: linear;
+  -ms-transition-timing-function: linear;
+  -moz-transition-timing-function: linear;
+}
+.videoPlayerOverlay .closeIcon {
+  position: absolute;
+  display: flex;
+  right: 15px;
+  top: 15px;
+  width: 3rem;
+  z-index: 200;
+  padding: 10px;
+  border-radius: 50%;
+  border: 0;
+  background: #fff;
+  width: 30px;
+  height: 30px;
+  transition-property: transform;
+  -moz-transition-property: transform;
+  -webkit-transition-property: transform;
+  -o-transition-property: transform;
+  -ms-transition-property: transform;
+  transition-duration: 0.25s;
+  -webkit-transition-duration: 0.25s;
+  -ms-transition-duration: 0.25s;
+  -moz-transition-duration: 0.25s;
+  -o-transition-duration: 0.25s;
+  transition-timing-function: ease-in-out;
+  -webkit-transition-timing-function: ease-in-out;
+  -o-transition-timing-function: ease-in-out;
+  -ms-transition-timing-function: ease-in-out;
+  -moz-transition-timing-function: ease-in-out;
+}
+.closeIcon img {
+  width: 100%;
+  height: auto;
+}
+.videoPlayerOverlay iframe {
+  max-width: 853px;
+  max-height: 480px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: auto;
+  top: 50%;
+  transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
+  box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.75);
+}
+.videoPlayerOverlay.hiddenTransform {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(50px);
+  -webkit-transform: translateY(50px);
+}
+
 @media only screen and (max-width: 1500px) {
   .detailsContainer,
   .profileContainer {
@@ -709,7 +816,14 @@ svg:hover #flap {
     width: 40%;
   }
 }
-
+@media only screen and (min-width: 1200px) {
+  .videoPlayerOverlay .closeIcon:hover {
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.5);
+    transform: rotate(90deg);
+    -webkit-transform: rotate(90deg);
+  }
+}
 @media only screen and (max-width: 1200px) {
   .profileContainer {
     font-size: 0.9em;

@@ -158,19 +158,30 @@ def results():
 
 @app.route('/upcoming', methods=('GET', 'POST'))
 def upcoming():
+    # Get the page count of available results from the API and store it in a variable
     pageCount = requests.get(
         f"https://api.themoviedb.org/3/movie/upcoming?api_key={configuration.API_KEY_STORAGE}&language=en-US&region=US").json()["total_pages"]
+    # Get the current page from the user
     page = request.args.get('page')
     if page is None:
         page = 1
     else:
         page = int(page)
+    test = []
+    for i in range(1, pageCount + 1,1):
+        first_call = lookupUpcoming(i)
+        for j in first_call:
+            test.append(j)
+    def sort(e):
+        return e['date_obj']
+    test.sort(reverse=False, key=sort)
     upcomingMovies = lookupUpcoming(page)
+
     # render template with results
     if request.method == 'GET':
         if upcomingMovies == []:
             return redirect(url_for('index'))
-        return render_template('search/upcoming.html', results=upcomingMovies, page=page, pageCount=pageCount)
+        return render_template('search/upcoming.html', results=test, page=page, pageCount=pageCount)
     # if user clicks the follow button
     elif request.method == 'POST':
         # get the movie id from the form and look it up in our api
@@ -483,7 +494,10 @@ def register():
             db.session.commit()
             token = generate_confirmation_token(username)
             confirm_url = url_for('confirm_email', token=token, _external=True)
-            send_confirmation_email(username, confirm_url)
+            try:
+                send_confirmation_email(username, confirm_url)
+            except:
+                return redirect(url_for('error_404', error='SMTP Error. Please email moviereleasetracker@gmail.com.'))
             # flash success message
             user = User.query.filter_by(username=username).first()
             session.clear()
@@ -675,8 +689,11 @@ def forgot():
         else:
             token = user.get_reset_token()
             link = url_for('reset', token=token, _external=True)
-            send_reset_mail(username, token, link)
-            flash('An email has been sent with instructions to reset your password.')
+            try:
+                send_reset_mail(username, token, link)
+                flash('An email has been sent with instructions to reset your password.')
+            except:
+                return redirect(url_for('error_404', error='SMTP Error. Please email moviereleasetracker@gmail.com.'))
             return redirect(url_for('login'))
         flash(error)
     return render_template('auth/forgot.html')
@@ -749,7 +766,10 @@ def confirm_email(token):
 def resend_confirmation():
     token = generate_confirmation_token(g.user.username)
     confirm_url = url_for('confirm_email', token=token, _external=True)
-    send_confirmation_email(g.user.username, confirm_url)
+    try:
+        send_confirmation_email(g.user.username, confirm_url)
+    except:
+        return redirect(url_for('error_404', error='SMTP Error. Please email moviereleasetracker@gmail.com.'))
     flash('A new confirmation email has been sent.', 'success')
     return redirect(url_for('unconfirmed'))
 
@@ -761,6 +781,10 @@ def unconfirmed():
         return redirect(url_for('index'))
     return render_template('auth/unconfirmed.html')
 # Email confirmation functions
+
+@ app.route('/error/404')
+def error_404(error = None):
+    return render_template('error/404.html', error=error)
 
 def generate_confirmation_token(email):
     serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
