@@ -14,7 +14,13 @@
         <div data-url="{{ url }}" id="movieContainer"
             class="text-center col col-xl-2 col-lg-3 col-md-4 col-sm-5 col-12 mx-md-4 mx-sm-3 mb-md-5 mb-sm-4 mb-2">
             <div class="titleYear">
-                <p class="m-0">{{item['name']}}</p>
+                <p id="movie-container-title" class="mt-2 mb-1 boldText" data-title="{{item['name']}}">
+                    {% if item['name']|length < 19 %}
+                    {{item['name']}}
+                    {% else %}
+                    {{ item['name'][0:19] }}...
+                    {% endif %}
+                </p>
                 <p class="m-0 mb-1">({{item['release']}})</p>
             </div>
             {% if item['cover'] == 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None' %}
@@ -39,7 +45,7 @@
                         </svg></button>
                 </form>
                 {% elif not g.user %}
-                <a href="{{ url_for('login')}}"><button type="button" id="details_login_button"
+                <a href="{{ url_for('login', next=item['id']) }}"><button type="button" id="details_login_button"
                         class="btn btn-outline-dark mb-1">Login</button></a>
                 {% elif not g.user.confirmed %}
                 <a href="{{ url_for('unconfirmed')}}"><button type="button" id="details_login_button"

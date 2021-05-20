@@ -37,6 +37,10 @@ form a:link {
 form a {
   color: rgb(242, 243, 234);
 }
+.content,
+body {
+  background-color: var(--main-white);
+}
 .btn-dark {
   background-color: var(--main-gray);
   transition: all 0.25s ease;
@@ -60,7 +64,7 @@ form a {
   background: var(--main-gray);
 }
 .dropdown-item {
-  color: white;
+  color: var(--main-white);
 }
 .dropdown-menu li {
   position: relative;
@@ -179,8 +183,9 @@ section .details h3 {
 }
 
 .relatedMovieCover img {
-  height: 213px;
+  height: 100%;
   overflow: visible;
+  max-height: 224px;
 }
 
 .relatedMovieCover img:hover {
@@ -499,9 +504,30 @@ input[type="select"]:target {
   max-width: 100px;
 }
 #search_button {
-  min-width: 50%;
   background-color: var(--main-gray);
   transition: all 0.25s;
+}
+.search-results {
+  position: absolute;
+  top: 38px;
+  width: 100%;
+  background-color: var(--main-gray);
+  list-style-type: none;
+  text-align: left;
+  padding-left: 5px;
+  color: white;
+  max-height: 300px;
+  overflow-y: scroll;
+  z-index: 3;
+  border-radius: 0 0 5px 5px;
+}
+.search-results li {
+  background-color: var(--main-gray);
+  padding: 0.5rem;
+}
+.search-results li:hover {
+  background-color: var(--main-hover-gray);
+  cursor: pointer;
 }
 #search_button:hover {
   background-color: var(--main-hover-gray);
@@ -527,6 +553,8 @@ input[type="select"]:target {
 #movie_cover {
   max-width: 80% !important;
   max-height: 350px !important;
+  border-radius: 9.5px;
+  border: 1px solid;
 }
 
 #movieDetailsContainer {
@@ -535,6 +563,10 @@ input[type="select"]:target {
 }
 
 #movieContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
   max-height: 513px !important;
   border: 2px solid;
   border-radius: 9.5px;
@@ -582,7 +614,7 @@ input[type="select"]:target {
   border-radius: 0 5px 5px 0 !important;
   transition: all 0.35s ease;
 }
-.resultsContainer #details_button:hover {
+#details_button:hover {
   background-color: var(--main-white);
   color: var(--main-gray);
 }
@@ -622,12 +654,6 @@ input[type="select"]:target {
 
 .bg-released {
   background-color: #18f50024;
-}
-.movie-table {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: row;
 }
 svg:hover #flap {
   -webkit-animation: flap_in 0.5s ease;
@@ -814,6 +840,11 @@ svg:hover #flap {
 @media only screen and (max-width: 1400px) {
   #movieDetailsContainer {
     width: 40%;
+  }
+}
+@media only screen and (max-width: 1310px) and (min-width: 1200px) {
+  #movieContainer .btn-group button {
+    padding: 5px 15px !important;
   }
 }
 @media only screen and (min-width: 1200px) {
@@ -1063,7 +1094,6 @@ svg:hover #flap {
       height: 197px;
       min-width: 128px;
       grid-area: coverimg;
-      border-radius: 5px;
       margin-right: 1rem;
     }
     .btnGroup {

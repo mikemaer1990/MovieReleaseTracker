@@ -9,8 +9,10 @@ $(window).on('load', function () {
             console.log("Callback Invoked.");
         }
     };
-    var videoBuild = new YoutubeOverlayModule(configObject);
-    videoBuild.activateDeployment();
+    if (configObject.sourceUrl) {
+        var videoBuild = new YoutubeOverlayModule(configObject);
+        videoBuild.activateDeployment();
+    }
 });
 
 // Script for scrolling through related movies

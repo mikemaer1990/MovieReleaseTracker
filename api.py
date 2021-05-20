@@ -4,6 +4,74 @@ import configuration
 from flask import request
 from datetime import datetime
 
+def multiSearch(query, page=1):
+        # Contact API
+    try:
+        # retrieve api_key
+        api_key = configuration.API_KEY_STORAGE
+        response = requests.get(
+            f"https://api.themoviedb.org/3/search/multi?api_key={api_key}&language=en-US&query={query}&page={page}&include_adult=false&region=US")
+        response.raise_for_status()
+    except requests.RequestException:
+        return None
+        # Parse response
+    try:
+        # jsonify response
+        movies = response.json()
+        # initialize result list
+        results = []
+        search = movies['results']
+        # for each result - store their data in a new list
+        for result in search:
+            if 'original_language' in result and result['original_language'] == 'hi':
+                continue
+            if result['media_type'] == 'movie':
+                if result['release_date'] == '' or 'release_date' not in result:
+                    date_obj = 'Unknown'
+                    release_year = 'Unknown'
+                else:
+                    # parse release date info
+                    date_obj = datetime.strptime(
+                    result["release_date"], '%Y-%m-%d')
+                    name = result['original_title']
+                    release_year = date_obj.strftime('%Y')
+                    cover = result["poster_path"]
+                    rating = result['vote_average']
+            elif result['media_type'] == 'tv':
+                if result['first_air_date'] == '' or 'first_air_date' not in result:
+                    date_obj = 'Unknown'
+                    release_year = 'Unknown'
+                else:
+                    date_obj = datetime.strptime(
+                    result["first_air_date"], '%Y-%m-%d')
+                    name = result['original_name']
+                    release_year = date_obj.strftime('%Y')
+                    cover = result["poster_path"]
+                    rating = result['vote_average']
+            elif result['media_type'] == 'person':
+                date_obj = 'N/A'
+                release_year = 'N/A'
+                name = result['name']
+                cover = result["profile_path"]
+                rating = None
+            # create an object and add it to our results list
+            results.append({
+                "type": result["media_type"],
+                "name": name,
+                "id": result["id"],
+                "release": release_year,
+                "full_release": date_obj,
+                "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}',
+                "rating": rating
+            })
+            # def sort(e):
+            #     return e['release']
+            # results.sort(reverse=True, key=sort)
+        return results
+    except (KeyError, TypeError, ValueError):
+        return None
+    finally:
+        return results
 
 def lookupReleaseDate(id):
     release_obj = None
@@ -67,6 +135,7 @@ def lookupReleaseDate(id):
             "digital": {"full": digital_full, "small": digital_small},
             "theatre": {"full": theatre_full, "small": theatre_small}
         }
+        print(release_obj)
         return release_obj
     except (KeyError, TypeError, ValueError):
         return None
@@ -430,7 +499,8 @@ def lookupPersonMovies(id):
                 "release": release_year,
                 "full_release": date_obj,
                 "cover": f'https://image.tmdb.org/t/p/w600_and_h900_bestv2{cover}',
-                "rating": result["vote_average"]
+                "rating": result["vote_average"],
+                "type": result["media_type"]
             })
 
             def sort(e):
@@ -824,7 +894,8 @@ def lookupById(id):
             "genres": movies["genres"],
             "director": credits['crew'],
             "cast": credits['cast'],
-            "backdrop": f'http://image.tmdb.org/t/p/w1920_and_h1080_multi_faces{backdrop}'
+            "backdrop": backdrop
+            # "backdrop": f'http://image.tmdb.org/t/p/w1920_and_h1080_multi_faces{backdrop}'
         })
         return results
     except (KeyError, TypeError, ValueError):
@@ -853,9 +924,10 @@ def lookupTvById(id):
         # genres = []
         # pre-set cover to be used in f string
         cover = shows["poster_path"]
+        backdrop = shows["backdrop_path"]
         # parse release date info
         # THIS NEEDS WORK CLEARLY
-        if shows["first_air_date"] == '' or "first_air_date" not in shows:
+        if shows["first_air_date"] == '' or "first_air_date" not in shows or shows["first_air_date"] == None:
             date_obj = datetime.now()
             release_year = 'N/A'
             release_date = 'N/A'
@@ -878,7 +950,8 @@ def lookupTvById(id):
             "cast": cast,
             "creators": shows['created_by'],
             "episodes": shows["number_of_episodes"],
-            "seasons": shows["number_of_seasons"]
+            "seasons": shows["number_of_seasons"],
+            "backdrop": f'http://image.tmdb.org/t/p/w1920_and_h1080_multi_faces{backdrop}'
         })
         return results
     except (KeyError, TypeError, ValueError):

@@ -10,7 +10,7 @@
     <div class="row no-gutters justify-content-center">
         {% for item in results %}
         {% set url = url_for('profile', id=item['id'])%}
-        <div onclick="location.href='{{url}}';" id="movieContainer"
+        <div data-url="{{ url }}" id="movieContainer" title="{{ item['name'] }}"
             class="text-center col col-xl-2 col-lg-3 col-md-4 col-sm-5 col-12 mx-md-4 mx-sm-3 mb-md-5 mb-sm-4 mb-2">
             <div class="titleYear">
                 <p class="m-0">{{item['name']}}</p>
@@ -22,10 +22,10 @@
             <img id="movie_cover" src="{{ item['cover'] }}" alt="movie poster" class="img-responsive">
             {% endif %}
             <div class="btn-group btnGroup">
-                <a class="d-block mt-1" href="{{ url }}"><button type="button" id="details_button"
-                        class="btn btn-dark mb-1 px-4">Info</button></a>
+                <a class="d-block mt-1" href="{{ url }}"><button type="button" id="details_login_button"
+                        class="btn btn-outline-dark mb-1 px-4">Info</button></a>
                 <a class="d-block mt-1" href="{{ url_for('peoplemovies', id=item['id']) }}"><button type="button"
-                        id="details_button" class="btn btn-outline-dark mb-1 px-4">Movies</button></a>
+                        id="details_button" class="btn btn-dark mb-1 px-4">Movies</button></a>
             </div>
         </div>
         {% endfor %}
@@ -40,5 +40,5 @@
             {% endif %}
         </div>
     </div>
-
+    <script src="{{ url_for('static', filename='javascripts/movieResults.js') }}"></script>
     {% endblock %}

@@ -688,6 +688,7 @@
 
     </a>
     <div class="btn-group">
+      {% if home != True %}
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavIdSearch"
         aria-controls="collapsibleNavIdSearch" aria-expanded="false" aria-label="Toggle navigation">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search"
@@ -696,6 +697,7 @@
             d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
         </svg>
       </button>
+      {% endif %}
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -704,6 +706,7 @@
 
     <div class="collapse navbar-collapse me-2" id="collapsibleNavIdSearch">
       <ul class="navbar-nav">
+        {% if home != True %}
         <form class="d-flex" action="/results" method="get">
           <div class="input-group mt-1">
             <div class="input-group-prepend">
@@ -711,6 +714,7 @@
             </div>
             <input id="searchBarInput" class="col-sm-12 form-control" type="text" placeholder="Search"
               aria-label="Search" name="query" required autocomplete="off">
+            <ul class="search-results"></ul>
             <select class="form-select indexSelect mr-sm-2 text-center mb-2" name="query_type" id="movie_title">
               <option class="pt-1" selected value="1">Movies</option>
               <option value="2">TV</option>
@@ -718,6 +722,7 @@
             </select>
           </div>
         </form>
+        {% endif %}
     </div>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -817,5 +822,6 @@
 <!-- BS5 -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
   integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+<script src="{{ url_for('static', filename='javascripts/searchBar.js') }}"></script>
 
 </html>

@@ -1,26 +1,27 @@
-{% extends 'base.html' %}
-
-{% block title %}Search{% endblock %}
-
-{% block content %}
+{% extends 'base.html' %} {% block title %}Search{% endblock %} {% block content
+%}
 
 <div id="search_container">
   <h2 class="mb-2" id="search_header">Movie Release Date Tracker</h2>
   <form class="form md-form mr-auto mb-4 px-2" method="post">
     <div class="input-group">
-      <input name="movie_title" id="movie_title" class="form-control mr-sm-2 text-center mb-2" type="text"
-        placeholder="Enter movie title here" aria-label="Search" required>
-      <select class="form-select indexSelect mr-sm-2 text-center mb-2" name="query_type" id="movie_title" required>
+      <input name="movie_title" id="movie_title" class="form-control text-center" type="text"
+        placeholder="Enter movie title here" aria-label="Search" required autocomplete="off" />
+      <ul class="search-results"></ul>
+      <button class="btn btn-dark btn-md" type="submit" id="search_button">
+        <img src="../../static/search.png" alt="search icon" width="16" height="16">
+      </button>
+      <!-- <select class="form-select indexSelect mr-sm-2 text-center mb-2" name="query_type" id="movie_title" required>
         <option value="1">Movies</option>
         <option value="2">TV</option>
         <option value="3">People</option>
-      </select>
+      </select> -->
     </div>
-    <div class="d-grid gap-2">
-      <button class="btn btn-dark btn-rounded btn-md my-1" type="submit" id="search_button">Search</button>
-    </div>
-
+    <!-- <div class="d-grid gap-2">
+      <button class="btn btn-dark btn-rounded btn-md my-1" type="submit" id="search_button">
+        Search
+      </button>
+    </div> -->
   </form>
 </div>
-
 {% endblock %}

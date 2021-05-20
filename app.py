@@ -1,7 +1,6 @@
 import os
 import configuration
 import re
-import time
 import requests
 
 from flask import Flask
@@ -10,7 +9,7 @@ from flask import flash, g, redirect, render_template, request, url_for, session
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from itsdangerous import URLSafeTimedSerializer
 from werkzeug.security import generate_password_hash, check_password_hash
-from api import lookup, lookupById, lookupTvById, lookupReleaseDate, lookupTrailer, lookupCast, lookupRelated, lookupRelatedMovies, lookupRelatedTv, lookupTv, lookupUpcoming, lookupPopular, lookupPersonMovies, lookupPersonProfile, lookupPersonName, lookupGenre, lookupTvGenre
+from api import lookup, multiSearch, lookupById, lookupTvById, lookupReleaseDate, lookupRelated, lookupTv, lookupUpcoming, lookupPopular, lookupPersonMovies, lookupPersonProfile, lookupPersonName, lookupGenre, lookupTvGenre
 from utilities import login_required, check_confirmed
 from emailer import send_release_mail, send_reset_mail, send_confirmation_email
 from datetime import datetime
@@ -19,8 +18,13 @@ from datetime import datetime
 app = Flask(__name__)
 
 # setting up config
-app.config['SECRET_KEY'] = configuration.SECRET_KEY_STORAGE
-
+# app.config['SECRET_KEY'] = configuration.SECRET_KEY_STORAGE
+app.config.update(
+    SECRET_KEY = configuration.SECRET_KEY_STORAGE,
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax'
+)
 # used to switch DB
 ENV = 'launch'
 if ENV == 'dev':
@@ -34,7 +38,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # our database models
-
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -82,7 +85,7 @@ def index():
     # acquire the movie title from form and pass it to the results page
     if request.method == 'POST':
         query = request.form['movie_title']
-        query_type = int(request.form['query_type'])
+        # query_type = int(request.form['query_type'])
         # parse input to make sure its not empty and that the search will return some results
         if query == '':
             error = 'Please provide a movie title'
@@ -91,12 +94,14 @@ def index():
             error = 'Please refine your search query to be more specific'
         # if valid and results are found - redirect to results page - passing the query
         else:
-            if query_type == 1:
-                return redirect(url_for('results', query=query))
-            elif query_type == 2:
-                return redirect(url_for('tvresults', query=query))
-            elif query_type == 3:
-                return redirect(url_for('people', query=query))
+            # New multisearch function implementation
+            return redirect(url_for('results', query=query))
+            # if query_type == 1:
+            #     return redirect(url_for('results', query=query))
+            # elif query_type == 2:
+            #     return redirect(url_for('tvresults', query=query))
+            # elif query_type == 3:
+            #     return redirect(url_for('people', query=query))
         # flash error
         flash(error)
     # get request will display index
@@ -107,21 +112,26 @@ def index():
 @app.route('/results', methods=('GET', 'POST'))
 def results():
     query = request.args.get('query')
-    if request.args.get('query_type'):
-        query_type = int(request.args.get('query_type'))
-        if query_type == 3:
-            return redirect(url_for('people', query=query))
-        elif query_type == 2:
-            return redirect(url_for('tvresults', query=query))
+    # New multisearch function implementation
+    # if request.args.get('query_type'):
+    #     query_type = int(request.args.get('query_type'))
+    #     if query_type == 3:
+    #         return redirect(url_for('people', query=query))
+    #     elif query_type == 2:
+    #         return redirect(url_for('tvresults', query=query))
     pageCount = requests.get(
-        f"https://api.themoviedb.org/3/search/movie?api_key={configuration.API_KEY_STORAGE}&language=en-US&query={query}&include_adult=false&region=US").json()["total_pages"]
+        f"https://api.themoviedb.org/3/search/multi?api_key={configuration.API_KEY_STORAGE}&language=en-US&query={query}&page=1&include_adult=false&region=US").json()["total_pages"]
+    # pageCount = requests.get(
+    #     f"https://api.themoviedb.org/3/search/movie?api_key={configuration.API_KEY_STORAGE}&language=en-US&query={query}&include_adult=false&region=US").json()["total_pages"]
     page = request.args.get('page')
     if page is None:
         page = 1
     else:
         page = int(page)
     # use our api to get results based on query string
-    searchQuery = lookup(query, page)
+    searchQuery = multiSearch(query, page)
+    # searchQuery = lookup(query, page)
+    # New multisearch function implementation
     # render template with results
     if request.method == 'GET':
         if searchQuery == []:
@@ -376,10 +386,10 @@ def profile(id):
     profile = lookupPersonProfile(id)
     # if get - then get api information and pass that to the template
     if request.method == 'GET':
-        return render_template('search/profile.html', profile=profile, movies=movies)
+        return render_template('search/profile.html', profile=profile, movies=movies, name=profile[0]['name'])
     # else if they click the follow button
     elif request.method == 'POST':
-        return render_template('search/profile.html', profile=profile, movies=movies)
+        return render_template('search/profile.html', profile=profile, movies=movies,name=profile[0]['name'])
 
 
 @app.route('/details/<string:mediaType>/<int:id>', methods=('GET', 'POST'))
@@ -387,7 +397,7 @@ def details(id, mediaType):
     if mediaType == 'tv':
         movie = lookupTvById(id)
         related = lookupRelated(id)
-        bg = None
+        bg = movie[0]['backdrop']
     else:
         movie = lookupById(id)
         related = lookupRelated(id)
@@ -401,7 +411,7 @@ def details(id, mediaType):
             date_obj = datetime.strptime(movie[0]['release_full'], '%B %d, %Y')
             release_year = date_obj.strftime('%Y')
             release = movie[0]['release_full']
-        return render_template('search/details.html', details=movie, release=release, year=release_year, related=related, mediaType=mediaType, bg = bg)
+        return render_template('search/details.html', details=movie, release=release, year=release_year, related=related, mediaType=mediaType, bg = bg, title=movie[0]['name'])
     # else if they click the follow button
     elif request.method == 'POST':
         movie = lookupById(id)[0]
@@ -515,6 +525,7 @@ def register():
 
 @ app.route('/auth/login', methods=('POST', 'GET'))
 def login():
+    next = request.args.get('next')
     if request.method == 'POST':
         # on post - retrieve info from our form
         username = request.form['username'].lower()
@@ -530,7 +541,10 @@ def login():
             if user.confirmed == False:
                 flash('Please confirm your email')
             # redirect to home page
-            return redirect(url_for('index'))
+            if next == None:
+                return redirect(url_for('index'))
+            else:
+                return redirect(url_for('details', id=next, mediaType='movie'))
         # parse for errors and set error message accordingly
         elif not user or user is None:
             error = 'Invalid Username/Password Combination'
@@ -619,8 +633,11 @@ def load_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        user = User.query.filter_by(id=user_id).all()
-        g.user = user[0]
+        try:
+            user = User.query.filter_by(id=user_id).all()
+            g.user = user[0]
+        except Exception as e:
+            return redirect(url_for('error_404', error='Database error, please email admin @ moviereleasetracker@gmail.com'))
 
 # logout route
 
@@ -639,12 +656,15 @@ def update_release_dates():
         database_id = release.movie_id
         database_date = release.movie_date
         updated_info = lookupReleaseDate(database_id)
+        print(database_date, updated_info)
         if database_date != updated_info['digital']['small'] and updated_info['digital']['small'] != 'TBA':
-            if (database_date) != updated_info['theatre']['small'] and updated_info['theatre']['small'] != 'TBA':
+            if database_date != updated_info['theatre']['small'] and updated_info['theatre']['small'] != 'TBA':
                 release.movie_date = updated_info['theatre']['small']
             elif updated_info['digital']['small'] != 'TBA':
                 release.movie_date = updated_info['digital']['small']
-            db.session.commit()
+        elif database_date != updated_info['theatre']['small'] and updated_info['theatre']['small'] != 'TBA':
+            release.movie_date = updated_info['theatre']['small']
+        db.session.commit()
 
 # function to go over database and find any movie that releases on 'todays' date
 

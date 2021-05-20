@@ -1,13 +1,11 @@
 {% extends 'base.html' %}
 
-{% block title %}Details{% endblock %}
-<link rel="stylesheet" href="">
-
+{% block title %}{{ title }} - Details{% endblock %}
 
 {% block content %}
 {% if bg != None %}
 <div class="details-backdrop"
-  style="background: center center / cover no-repeat url('{{bg}}'); border-top:5px outset var(--main-gray);">
+  style="background-image: url('https://image.tmdb.org/t/p/w1280_and_h720_multi_faces{{bg}}'),  url('https://image.tmdb.org/t/p/original{{bg}}'); background-position: center center; border-top:5px outset var(--main-gray);">
   {% endif %}
   {% for item in details %}
   <div class="detailsBG">
@@ -18,7 +16,7 @@
         {% else %}
         <img src="{{ item['cover'] }}" alt="movie poster">
         {% endif %}
-        {% if item['trailer'] != None %}
+        {% if item['trailer'] != None and item['trailer'] %}
         <button id="exampleImage" data-videourl="{{ item['trailer'] }}">Trailer</button>
         {% else %}
         <a id="trailer" class="trailer" href="#"><button disabled="">Trailer</button></a>
@@ -33,7 +31,7 @@
         <h3 class="mt-2 mb-md-0 d-inline-block displayNone">{{item['name']}} <span
             class="detailsYear">({{ year }})</span>
           <form class="d-inline-block mt-0 formTop ml-1" method="post">
-            {% if g.user and mediaType != 'tv' and g.user.confirmed%}
+            {% if g.user and mediaType != 'tv' and g.user.confirmed %}
             <button type="submit" name="movie_id" id="details_button" value="{{item['id']}}"
               class="btn btn-circle btn-outline-danger"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                 fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
@@ -41,7 +39,7 @@
                   d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z" />
               </svg></button>
             {% elif not g.user %}
-            <a href="{{ url_for('login')}}"><button type="button" id="details_login_button"
+            <a href="{{ url_for('login', next=item['id']) }}"><button type="button" id="details_login_button"
                 class="btn btn-sm btn-dark mt-0">Login to
                 Follow</button></a>
             {% elif not g.user.confirmed %}
@@ -120,7 +118,7 @@
           <button type="submit" name="movie_id" id="detailsbutton" value="{{item['id']}}"
             class="btn btn-block btn-danger">Follow</button>
           {% else %}
-          <a href="{{ url_for('login')}}"><button type="button" id="details_login_button"
+          <a href="{{ url_for('login', next=item['id']) }}"><button type="button" id="details_login_button"
               class="btn btn-block btn-danger">Login to
               Follow</button></a>
           {% endif %}

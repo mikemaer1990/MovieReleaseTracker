@@ -39,7 +39,7 @@
                             </svg></button>
                     </form>
                     {% else %}
-                    <a href="{{ url_for('login')}}"><button type="button" id="details_login_button"
+                    <a href="{{ url_for('login', next=item['id']) }}"><button type="button" id="details_login_button"
                             class="btn btn-dark mb-1">Login</button></a>
                     {% endif %}
                     <a href="{{ url_for('details', id=item['id']) }}"><button type="button" id="details_button"
