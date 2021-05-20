@@ -1,3 +1,5 @@
+// Author -- Sricharan Krishnan
+// Source -- https://github.com/sricharankrishnan/click-image-play-youtube-video
 /*
    This is the Javascript module that helps to build and play the required Iframes from Youtube
    Its a javascript constructor that is being called with 3 required argument.
