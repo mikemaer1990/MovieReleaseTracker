@@ -5,7 +5,7 @@
 {% block content %}
 {% if bg != None %}
 <div class="details-backdrop"
-  style="background-image: url('https://image.tmdb.org/t/p/w1280_and_h720_multi_faces{{bg}}'),  url('https://image.tmdb.org/t/p/original{{bg}}'); background-position: center center; background-repeat: no-repeat; background-size: cover; border-top:5px outset var(--main-gray);">
+  style="background-image: url('https://image.tmdb.org/t/p/original{{bg}}'), url('https://image.tmdb.org/t/p/w1280_and_h720_multi_faces{{bg}}') ; background-position: center center; background-repeat: no-repeat; background-size: cover; border-top:5px outset var(--main-gray);">
   {% endif %}
   {% for item in details %}
   <div class="detailsBG">
