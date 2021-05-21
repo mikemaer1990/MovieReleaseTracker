@@ -460,7 +460,7 @@ def tvresults():
 @ app.route('/schedule')
 def schedule():
     if request.method == 'GET':
-        update_release_dates()
+        # update_release_dates()
         check_db()
         return render_template('search/schedule.html')
 
