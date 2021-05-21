@@ -717,7 +717,7 @@ def forgot():
             token = user.get_reset_token()
             link = url_for('reset', token=token, _external=True)
             try:
-                send_reset_mail(username, link)
+                send_reset_mail(username, token, link)
                 flash('An email has been sent with instructions to reset your password.')
             except:
                 return redirect(url_for('error_404', error='SMTP Error. Please email moviereleasetracker@gmail.com.'))

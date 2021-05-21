@@ -31,7 +31,7 @@ def send_release_mail(recipients, date, subject, img_url):
     server.quit()
 
 # function that sends an eamil from our SMTP server to reset password
-def send_reset_mail(recipients, link):
+def send_reset_mail(recipients, token, link):
     # set values for the smtplib sendmail function
     smtp_server = 'smtp.gmail.com'
     port = 587
