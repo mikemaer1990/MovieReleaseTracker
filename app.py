@@ -460,8 +460,8 @@ def tvresults():
 @ app.route('/schedule')
 def schedule():
     if request.method == 'GET':
-        check_db()
         update_release_dates()
+        check_db()
         return render_template('search/schedule.html')
 
 # register route
@@ -688,9 +688,16 @@ def check_db():
                 id=release.user_id).first().username
             # as well as the movie title
             movie_title = release.movie_title
+            # Get the poster for the movie
+            movie = lookupById(release.movie_id)
+            movie_poster = movie[0]['cover']
+            if movie_poster != 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None':
+                movie_poster_url = movie_poster
+            else:
+                movie_poster_url = 'http://www.riobeauty.co.uk/images/product_image_not_found.gif'
             # send the email
             try:
-                send_release_mail(to_email, release_date, movie_title)
+                send_release_mail(to_email, release_date, movie_title, movie_poster_url)
             # if a failure occurs - print an error
             except:
                 print('Email Error')
@@ -710,7 +717,7 @@ def forgot():
             token = user.get_reset_token()
             link = url_for('reset', token=token, _external=True)
             try:
-                send_reset_mail(username, token, link)
+                send_reset_mail(username, link)
                 flash('An email has been sent with instructions to reset your password.')
             except:
                 return redirect(url_for('error_404', error='SMTP Error. Please email moviereleasetracker@gmail.com.'))
