@@ -719,7 +719,8 @@ def forgot():
             try:
                 send_reset_mail(username, token, link)
                 flash('An email has been sent with instructions to reset your password.')
-            except:
+            except Exception as e:
+                print(e)
                 return redirect(url_for('error_404', error='SMTP Error. Please email moviereleasetracker@gmail.com.'))
             return redirect(url_for('login'))
         flash(error)
