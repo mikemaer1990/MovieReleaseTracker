@@ -4,12 +4,15 @@ import configuration
 from email.mime.text import MIMEText
 
 # function that sends an eamil from our SMTP server
-def send_release_mail(recipients, date, subject):
+def send_release_mail(recipients, date, subject, img_url):
     # set values for the smtplib sendmail function
-    smtp_server = 'smtp.gmail.com'
+    smtp_server = "smtp.gmail.com"
     port = 587
-    from_email = 'Movie Release Tracker <MovieReleaseTracker@Gmail>'
-    message = f"<h3>{subject} Comes Out Today, {date}!</h3>"
+    from_email = f"MRT Release Notification - {subject}"
+    message = f"<div>\
+                    <h3>{subject} Comes Out Today, {date}!</h3>\
+                    <a href='https://www.watchplaystream.com/en/search/{subject}.html'><img src='{img_url}' width=100 height=150></a>\
+                </div>"
 
     # msg sections
     msg = MIMEText(message, 'html')

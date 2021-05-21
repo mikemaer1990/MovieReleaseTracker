@@ -9,9 +9,9 @@ def send_release_mail(recipients, date, subject, img_url):
         to_emails = recipients,
         subject = f"MRT Release Notification - {subject}",
         html_content = f"<div>\
-            <h3>{subject} Comes Out Today, {date}!</h3>\
-            <img src='{img_url}' width=50 height=50>\
-            </div>"
+                            <h3>{subject} Comes Out Today, {date}!</h3>\
+                            <img src='{img_url}' width=50 height=50>\
+                        </div>"
         )
     try:
         sg = SendGridAPIClient(configuration.SENDGRID_API_KEY)
