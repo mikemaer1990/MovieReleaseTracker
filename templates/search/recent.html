@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block header %}
+<h1 class="text-center mt-5">{% block title %}Recently Released Movies{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<div class="sort-wrapper col-12 mb-sm-0 my-3">
+    <select name="sort_by" id="sort_by" onchange="location = this.value;">
+        <option value="#">---Sort By:---</option>
+        {% if sort_by == 'popularity.asc' %}
+        <option selected value="{{ url_for('recent', sort_by='popularity.asc') }}">Popularity Ascending</option>
+        {% else %}
+        <option value="{{ url_for('recent', sort_by='popularity.asc') }}">Popularity Ascending</option>
+        {% endif %}
+        {% if sort_by == 'popularity.desc' %}
+        <option selected value="{{ url_for('recent', sort_by='popularity.desc') }}">Popularity Descending</option>
+        {% else %}
+        <option value="{{ url_for('recent', sort_by='popularity.desc') }}">Popularity Descending</option>
+        {% endif %}
+        {% if sort_by == 'primary_release_date.asc' %}
+        <option selected value="{{ url_for('recent', sort_by='primary_release_date.asc') }}">Release Date Ascending
+        </option>
+        {% else %}
+        <option value="{{ url_for('recent', sort_by='primary_release_date.asc') }}">Release Date Ascending</option>
+        {% endif %}
+        {% if sort_by == 'primary_release_date.desc' %}
+        <option selected value="{{ url_for('recent', sort_by='primary_release_date.desc') }}">Release Date Descending
+        </option>
+        {% else %}
+        <option value="{{ url_for('recent', sort_by='primary_release_date.desc') }}">Release Date Descending</option>
+        {% endif %}
+    </select>
+</div>
+
+<div class="resultsContainer no-gutters p-md-5 p-sm-2">
+    <div class="row no-gutters justify-content-center">
+        {% for item in results %}
+        {% set url = url_for('details', id=item['id'], mediaType='movie') %}
+        <div data-url="{{ url }}" id="movieContainer" title="{{ item['name'] }}"
+            class="text-center col col-xl-2 col-lg-3 col-md-4 col-sm-5 col-12 mx-md-4 mx-sm-3 mb-md-5 mb-sm-4 mb-2">
+            <div class="titleYear">
+                <p id="movie-container-title" class="mt-2 mb-1 boldText" data-title="{{item['name']}}">
+                    {% if item['name']|length < 19 %}
+                    {{item['name']}}
+                    {% else %}
+                    {{ item['name'][0:19] }}...
+                    {% endif %}
+                </p>
+                <p class="m-0 mb-1">{{item['full_release']}}</p>
+            </div>
+            {% if item['cover'] == 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None' %}
+            <img id="movie_cover" src="{{ url_for('static', filename='err_img.gif') }}" alt="movie poster"
+                class="img-responsive">
+            {% else %}
+            <img id="movie_cover" src="{{ item['cover'] }}" alt="movie poster" class="img-responsive">
+            {% endif %}
+            <form method="post">
+                <div class="btn-group btnGroup mt-2">
+                    {% if g.user and item['type'] != 'tv' and g.user.confirmed %}
+                    <form method="post">
+                        <button type="submit" name="movie_id" id="details_follow_button" value="{{item['id']}}"
+                            class="btn btn-outline-danger mb-1"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                height="16" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd"
+                                    d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z" />
+                            </svg></button>
+                    </form>
+                    {% elif not g.user %}
+                    <a href="{{ url_for('login', next=item['id']) }}"><button type="button" id="details_login_button"
+                            class="btn mb-1">Login</button></a>
+                    {% elif not g.user.confirmed %}
+                    <a href="{{ url_for('unconfirmed')}}"><button type="button" id="details_login_button"
+                            class="btn mb-1">Confirm</button></a>
+                    {% endif %}
+                    <a class="details_link" href="{{ url_for('details', id=item['id'], mediaType='movie') }}"><button
+                            type="button" id="details_button" class="btn btn-dark mb-1">Details</button></a>
+                </div>
+            </form>
+        </div>
+        {% endfor %}
+        <div class="d-flex justify-content-center">
+            {% if page > 1 %}
+            <a href="{{ url_for('recent', page=page-1, sort_by=sort_by) }}"><button type="button" id="prev-page"
+                    class="btn btn-outline-dark me-2">&larr; Prev
+                    Page</button></a>
+            {% endif %}
+            {% if page < pageCount %}
+            <a href="{{ url_for('recent', page=page+1, sort_by=sort_by) }}"><button type="button" id="next-page"
+                    class="btn btn-dark">Next Page &rarr;</button></a>
+            {% endif %}
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='javascripts/movieResults.js') }}"></script>
+    {% endblock %}

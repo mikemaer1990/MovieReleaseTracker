@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" color-mode="light">
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="description"
   content="Track upcoming movie release dates easily. Find new movies to follow. Get an email reminder when the movie you are following is released.">
@@ -9,7 +9,19 @@
 <!-- BS 5 -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
   integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
-
+<!-- Dark Mode -->
+<script>
+  // This code assumes a Light Mode default
+  if (
+    /* This condition checks whether the user has set a site preference for dark mode OR a OS-level preference for Dark Mode AND no site preference */
+    localStorage.getItem('color-mode') === 'dark' ||
+    (window.matchMedia('(prefers-color-scheme: dark)').matches &&
+      !localStorage.getItem('color-mode'))
+  ) {
+    // if true, set the site to Dark Mode
+    document.documentElement.setAttribute('color-mode', 'dark')
+  }
+</script>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap" rel="stylesheet">
 
@@ -700,7 +712,11 @@
       {% endif %}
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-text-right"
+          viewBox="0 0 16 16">
+          <path fill-rule="evenodd"
+            d="M6 12.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-4-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm4-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-4-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z" />
+        </svg>
       </button>
     </div>
 
@@ -709,21 +725,20 @@
         {% if home != True %}
         <form class="d-flex" action="/results" method="get">
           <div class="input-group mt-1">
-            <div class="input-group-prepend">
-              <button type="submit" id="" class="btn btn-dark">Search</button>
-            </div>
+
+            <button type="submit" id="" class="btn btn-dark">Search</button>
+
             <input id="searchBarInput" class="col-sm-12 form-control" type="text" placeholder="Search"
               aria-label="Search" name="query" required autocomplete="off">
             <ul class="search-results"></ul>
-            <select class="form-select indexSelect mr-sm-2 text-center mb-2" name="query_type" id="movie_title">
-              <option class="pt-1" selected value="1">Movies</option>
-              <option value="2">TV</option>
-              <option value="3">People</option>
-            </select>
+            <button class="btn btn-dark btn-md" type="submit" id="search_button">
+              <img src="../../../static/search.png" alt="search icon" width="16" height="16">
+            </button>
           </div>
         </form>
         {% endif %}
     </div>
+
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mx-auto">
@@ -742,6 +757,7 @@
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
             <li><a class="dropdown-item" href="{{ url_for('popular') }}">Popular</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('recent') }}">Recently Releasd</a></li>
             <li><a class="dropdown-item" href="#">Movies By Genre &raquo;</a>
               <ul class="dropdown-menu dropdown-submenu">
                 <li>
@@ -774,6 +790,14 @@
                 </li>
                 <li>
                   <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=10751, genrename='Family', mediaType='movie') }}">Family</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=14, genrename='Fantasy', mediaType='movie') }}">Fantasy</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
                     href="{{ url_for('genres', genre=36, genrename='History', mediaType='movie') }}">History</a>
                 </li>
                 <li>
@@ -782,11 +806,86 @@
                 </li>
                 <li>
                   <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=10402, genrename='Music', mediaType='movie') }}">Music</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
                     href="{{ url_for('genres', genre=9648, genrename='Mystery', mediaType='movie') }}">Mystery</a>
                 </li>
                 <li>
                   <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=10749, genrename='Romance', mediaType='movie') }}">Romance</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=878, genrename='Science Fiction', mediaType='movie') }}">Science
+                    Fiction</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=10770, genrename='TV Movie', mediaType='movie') }}">TV Movie</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
                     href="{{ url_for('genres', genre=53, genrename='Thriller', mediaType='movie') }}">Thriller</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=10752, genrename='War', mediaType='movie') }}">War</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=37, genrename='Western', mediaType='movie') }}">Western</a>
+                </li>
+              </ul>
+            </li>
+            <li><a class="dropdown-item" href="#">Shows By Genre &raquo;</a>
+              <ul class="dropdown-menu dropdown-submenu">
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=10759, genrename='Action & Adventure', mediaType='tv') }}">Action &
+                    Adventure</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=16, genrename='Animation', mediaType='tv') }}">Animation</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=35, genrename='Comedy', mediaType='tv') }}">Comedy</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=80, genrename='Crime', mediaType='tv') }}">Crime</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=99, genrename='Documentary', mediaType='tv') }}">Documentary</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=18, genrename='Drama', mediaType='tv') }}">Drama</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=10751, genrename='Family', mediaType='tv') }}">Family</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=10762, genrename='Kids', mediaType='tv') }}">Kids</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=9648, genrename='Mystery', mediaType='tv') }}">Mystery</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=10765, genrename='Sci-Fi & Fantasy', mediaType='tv') }}">Sci-Fi &
+                    Fantasy</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                    href="{{ url_for('genres', genre=37, genrename='Western', mediaType='tv') }}">Western</a>
                 </li>
               </ul>
             </li>
@@ -794,13 +893,46 @@
         </li>
       </ul>
     </div>
+    {% if g.user %}
+    <!--- Light mode button --->
+    <button class="color-mode__btn light--hidden" aria-label="Toggle light mode">
+      <img src="{{ url_for('static', filename='sun(3).png') }}" alt="light mode pic" width="20" height="20">
+    </button>
+    <!--- Dark mode button --->
+    <button class="color-mode__btn dark--hidden" aria-label="Toggle dark mode">
+      <img src="{{ url_for('static', filename='moon(4).png') }}" alt="dark mode pic" width="20" height="20">
+    </button>
+    {% else %}
+    <!--- Light mode button --->
+    <button class="color-mode__btn light--hidden not-reg" aria-label="Toggle light mode">
+      <img src="{{ url_for('static', filename='sun(3).png') }}" alt="light mode pic" width="20" height="20">
+    </button>
+    <!--- Dark mode button --->
+    <button class="color-mode__btn dark--hidden not-reg" aria-label="Toggle dark mode">
+      <img src="{{ url_for('static', filename='moon(4).png') }}" alt="dark mode pic" width="20" height="20">
+    </button>
+    {% endif %}
+
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <div class="ms-auto me-2 d-flex" id="navbarSupportedContent">
         <ul class="navbar-nav mt-2 mt-lg-0">
           {% if g.user %}
-          <li class="nav-item mt-2 me-2"><span class="">{{ g.user.username }}</span>
-          <li class="nav-item mt-1 mx-1 text-primary power-button"><a href="{{ url_for('logout') }}"><img
-                src="{{ url_for('static', filename='power.png') }}" alt="power icon" width="20" height="20"></a>
+          <li class="nav-item mt-2 me-2 ms-1 ms-lg-0"><span class="">{{ g.user.username }}</span>
+          <li class="nav-item mt-1 mx-1 text-primary power-button"><a href="{{ url_for('logout') }}">
+              <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 489.888 489.888"
+                style="enable-background:new 0 0 489.888 489.888;" xml:space="preserve">
+                <g>
+                  <g>
+                    <path d="M25.383,290.5c-7.2-77.5,25.9-147.7,80.8-192.3c21.4-17.4,53.4-2.5,53.4,25l0,0c0,10.1-4.8,19.4-12.6,25.7
+                  c-38.9,31.7-62.3,81.7-56.6,136.9c7.4,71.9,65,130.1,136.8,138.1c93.7,10.5,173.3-62.9,173.3-154.5c0-48.6-22.5-92.1-57.6-120.6
+                  c-7.8-6.3-12.5-15.6-12.5-25.6l0,0c0-27.2,31.5-42.6,52.7-25.6c50.2,40.5,82.4,102.4,82.4,171.8c0,126.9-107.8,229.2-236.7,219.9
+                  C122.183,481.8,35.283,396.9,25.383,290.5z M244.883,0c-18,0-32.5,14.6-32.5,32.5v149.7c0,18,14.6,32.5,32.5,32.5
+                  s32.5-14.6,32.5-32.5V32.5C277.383,14.6,262.883,0,244.883,0z" />
+                  </g>
+                </g>
+              </svg>
+            </a>
             {% else %}
           <li class="nav-item"><a class="nav-link" href="{{ url_for('login')}}">Login</a></li>
           <li class="nav-item mr-2"><a class="nav-link" href="{{ url_for('register')}}">Register</a></li>
@@ -814,11 +946,14 @@
   <header>
     {% block header %}{% endblock %}
   </header>
-  {% for message in get_flashed_messages() %}
-  <div class="flash">{{ message }}</div>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+  <div class="flash {{category}}">{{ message }}</div>
   {% endfor %}
+  {% endwith %}
   {% block content %}{% endblock %}
 </section>
+
 <!-- BS5 -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
   integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>

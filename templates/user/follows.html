@@ -12,6 +12,7 @@
       <tr>
         <th scope="col">Title</th>
         <th scope="col">Release</th>
+        <th scope="col">Type</th>
         <th scope="col">Details</th>
         <th scope="col">Delete</th>
       </tr>
@@ -20,7 +21,10 @@
 
       {% if not follows %}
       <tr>
-        <td class="col-12">Nothing to see here...</td>
+        <td class="col-md-5">Nothing to see here...</td>
+        <td class="col-md-3">🎥</td>
+        <td class="col-md-2">🎬</td>
+        <td class="col-md-2">🍿</td>
       </tr>
       {% else %}
       {% for movie in follows %}
@@ -29,13 +33,18 @@
         {% else %}
       <tr class="bg-unreleased">
         {%endif%}
-        <td class="col-md-5 movie-table">{{movie['name']}}</td>
-        <td class="col-md-3 movie-table">{{movie['release']}}</td>
-        <td class="col-md-2 text-center"><a href="{{ url_for('details', id=movie['id'], mediaType='movie') }}"><button
+        <td class="col-md-4 movie-table">{{ movie['name'] }}</td>
+        <td class="col-md-3 movie-table">{{ movie['release'] }}</td>
+        <td class="col-md-2 movie-table">{{ movie['movie_type']|capitalize }}</td>
+        <td class="col-md-1 text-center"><a href="{{ url_for('details', id=movie['id'], mediaType='movie') }}"><button
               type="button" class="btn btn-success mb-1">Details</button></a>
-        <td class="text-center col-md-2">
-          <form method="post"><button type="submit" name="movie_id" value="{{movie['id']}}" class="btn btn-danger"><img
-                id="trash_svg" src="../../static/trash.svg"></button></form>
+        <td class="text-center col-md-1">
+          <form method="post">
+            <input checked type="checkbox" id="hidden" name="movie_type" value="{{movie['movie_type']}}">
+            <button type="submit" name="movie_id" value="{{movie['id']}}" class="btn btn-danger">
+              <img id="trash_svg" src="../../static/trash.svg">
+            </button>
+          </form>
         </td>
       </tr>
       {% endfor %}
@@ -43,5 +52,5 @@
     </tbody>
   </table>
 </div>
-<hr class="end mt-2">
+<!-- <hr class="end mt-2"> -->
 {% endblock %}

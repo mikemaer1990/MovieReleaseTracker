@@ -2,9 +2,7 @@
 
 {% block title %}{{ name }} - Profile Page{% endblock %}
 
-
 {% block content %}
-
 
 {% for item in profile %}
 
@@ -17,34 +15,55 @@
     {% endif %}
     <section class="mobileTitleProfile">
       <h5 class="mt-2 mb-md-0 d-inline-block">{{item['name']}}</h5>
-      <p class="mt-0 mb-0">Birthday: <span class="boldText">{{item['birthday']}} (Age: {{item['age']}})</span></p>
+      <p class="mt-0 mb-0">Birthday: <span class="boldText">{{item['birthday']}}
+          {% if item['birthday'] != '-' and item['deathday'] == None %}
+          (Age: {{item['age']}})
+          {% endif %}
+        </span>
+      </p>
+      {% if item['deathday'] != None%}
+      <p class="mt-0 mb-0">Died: <span class="boldText">{{item['deathday']}}</span></p>
+      {% endif %}
       <p class="mb-0">Known For: <span class="boldText">{{item['job']}}</span></p>
+      {% if item['birthLocation'] != None %}
       <p class="mb-0">Born In: <span class="boldText">{{item['birthLocation']}}</span>
+        {% endif %}
     </section>
   </section>
 
   <section class="profileDetails pl-2 outsetBorderWhite">
     <h3 class="mt-2 mb-md-0 d-inline-block">{{item['name']}}</h3>
-    <p class="mt-0 mb-0">Birthday: <span class="boldText">{{item['birthday']}} (Age: {{item['age']}})</span></p>
-    <p class="mb-0">Known For: <span class="boldText">{{item['job']}}</span></p>
-    <p class="mb-0">Born In: <span class="boldText">{{item['birthLocation']}}</span>
+    <p class="mt-0 mb-0">Birthday:
+      <span class="boldText">
+        {{item['birthday']}}
+        {% if item['birthday'] != '-' and item['deathday'] == None %}
+        (Age: {{item['age']}})
+        {% endif %}
+      </span>
     </p>
+    {% if item['deathday']  %}
+    <p class="mt-0 mb-0">Died: <span class="boldText">{{item['deathday']}} (Age: {{item['age']}})</span></p>
+    {% endif %}
+    <p class="mb-0">Known For: <span class="boldText">{{item['job']}}</span></p>
+    {% if item['birthLocation'] != None %}
+    <p class="mb-0">Born In: <span class="boldText">{{item['birthLocation']}}</span></p>
+    {% endif %}
   </section>
 
   <section class="profileLinks outsetBorderWhite p-1 text-left">
     <div class="d-block">
       {% if item['imdb'] != None %}
-      <a class="my-1 me-2 d-block" href="https://www.imdb.com/title/{{item['imdb']}}" target="_blank"><img
+      <a class="my-1 me-2 d-block" href="https://www.imdb.com/name/{{item['imdb']}}" target="_blank"><img
           alt="IMDB Image" class="imdbImage" src="../../static/imdb.svg"></a>
       {% endif %}
-      <a class="mt-1" href="{{ url_for('peoplemovies', id=item['id']) }}"><button type="button"
+      <a class="mt-1" href="{{ url_for('peoplemovies', id=item['id'], name=item['name']) }}"><button type="button"
           class="btn btn-dark mb-1 px-3">Filmography</button></a>
     </div>
   </section>
 
 
   {% if item['pictures'] == [] %}
-  <section class="profilePics outsetBorderWhite p-0 d-flex justify-content-center align-items-center">
+  <section class="profilePics  p-0 d-flex justify-content-center align-items-center">
     <div>
       <h2 class="pt-3">No pictures found...</h2>
       <form class="p-2 mx-auto" action="https://www.google.com/search" target="_blank" method="GET">
@@ -55,62 +74,73 @@
       </form>
     </div>
     {% else %}
+    {% if item['pictures']|length >= 4 %}
     <section class="profilePics outsetBorderWhite p-0">
-      {% for pic in item['pictures'] %}
-      <div class="profilePicsPictures pe-1">
-        <a href="{{ pic }}" target="_blank">
-          {% if pic == 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None' %}
-          <img src="{{ url_for('static', filename='err_img.gif') }}" alt="profile picture">
-          {% else %}
-          <img src="{{ pic }}" alt="profile picture">
-          {% endif %}
-        </a>
-      </div>
-      {% endfor %}
-      {% endif %}
-      <button class="hide-focus" id="slideLeftProfilePics"><img class="arrowLeft" src="../../static/right2.png"
-          alt=""></span></button>
-      <button class="hide-focus" id="slideRightProfilePics"><img src="../../static/right2.png" alt=""></button>
-    </section>
-
-    <section class="profileOverview pl-2 outsetBorderWhite">
-      <h4 class="pt-1">Biography</h4>
-      {% if item['biography'] == '' %}
-      <p>This person must not be very famous... :P</p>
       {% else %}
-      {{ item['biography'] }}
-      {% endif %}
-    </section>
-
-    {% if movies == [] %}
-    <section class="profileRelated outsetBorderWhite d-block p-0 text-center">
-      <h2 class="pt-3">No related movies found...</h2>
-      <form class="p-2 mx-auto" action="https://www.google.com/search" target="_blank" method="GET">
-        <div class="d-grid gap-2">
-          <button class="btn btn-primary btn-md m-auto" name="q" value="{{item['name']}} movies" type="submit"
-            class="">Click here for related movies</button>
+      <section class="profilePics outsetBorderWhite p-0" style="justify-self: left;">
+        {% endif %}
+        {% for pic in item['pictures'] %}
+        <div class="profilePicsPictures">
+          <a href="{{ pic }}" target="_blank">
+            {% if pic == 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None' %}
+            <img src="{{ url_for('static', filename='err_img.gif') }}" alt="profile picture">
+            {% else %}
+            <img src="{{ pic }}" alt="profile picture">
+            {% endif %}
+          </a>
         </div>
-      </form>
-    </section>
-    {% else %}
-    <section class="profileRelated outsetBorderWhite p-0 d-flex justify-content-start" id="profileRelated">
-      {% for movie in movies %}
-      <div class="profileRelatedMovieCover pe-1">
-        <a href="{{ url_for('details', id=movie['id'], mediaType='movie') }}">
-          {% if movie['cover'] == 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None' %}
-          <img src="{{ url_for('static', filename='err_img.gif') }}" alt="movie poster">
-          {% else %}
-          <img src="{{ movie['cover'] }}" alt="movie poster">
-          {% endif %}
-        </a>
-      </div>
-      {% endfor %}
+        {% endfor %}
+        {% endif %}
+        {% if item['pictures']|length >= 4 %}
+        <button class="hide-focus" id="slideLeftProfilePics">
+          <img class="arrowLeft" src="../../static/right2.png" alt="left arrow" data-direction="left">
+        </button>
+        <button class="hide-focus" id="slideRightProfilePics">
+          <img src="../../static/right2.png" alt="right arrow" data-direction="right">
+        </button>
+        {% endif %}
 
-      <button class="hide-focus" id="slideLeftProfile"><img class="arrowLeft" src="../../static/right2.png"
-          alt=""></span></button>
-      <button class="hide-focus" id="slideRightProfile"><img src="../../static/right2.png" alt=""></button>
-    </section>
-    {% endif %}
+      </section>
+
+      <section class="profileOverview pl-2 outsetBorderWhite">
+        <h4 class="pt-1">Biography</h4>
+        {% if item['biography'] == '' or item['biography'] == None %}
+        <p>This person must not be very famous... :P</p>
+        {% else %}
+        {{ item['biography'] }}
+        {% endif %}
+      </section>
+
+      {% if movies == [] %}
+      <section class="profileRelated outsetBorderWhite d-block p-0 text-center">
+        <h2 class="pt-3">No related movies found...</h2>
+        <form class="p-2 mx-auto" action="https://www.google.com/search" target="_blank" method="GET">
+          <div class="d-grid gap-2">
+            <button class="btn btn-primary btn-md m-auto" name="q" value="{{item['name']}} movies" type="submit"
+              class="">Click here for related movies</button>
+          </div>
+        </form>
+      </section>
+      {% else %}
+      <section class="profileRelated outsetBorderWhite p-0 d-flex justify-content-start" id="profileRelated">
+        {% for movie in movies if not movie['cover'] == 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None' %}
+        <div class="profileRelatedMovieCover">
+          <a href="{{ url_for('details', id=movie['id'], mediaType='movie') }}">
+            {% if movie['cover'] == 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None' %}
+            <img src="{{ url_for('static', filename='err_img.gif') }}" alt="movie poster">
+            {% else %}
+            <img src="{{ movie['cover'] }}" alt="movie poster" title="{{ movie['name'] }}">
+            {% endif %}
+          </a>
+        </div>
+        {% endfor %}
+
+        <button class="hide-focus" id="slideLeftProfile"><img class="arrowLeft" src="../../static/right2.png"
+            alt="left arrow" data-direction="left"></span></button>
+        <button class="hide-focus" id="slideRightProfile"><img data-direction="right" src="../../static/right2.png"
+            alt="right arrow"></button>
+      </section>
+      {% endif %}
 </div>
 
 {% endfor %}

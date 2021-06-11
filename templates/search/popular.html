@@ -32,8 +32,8 @@
             {% else %}
             <img id="movie_cover" src="{{ item['cover'] }}" alt="movie poster" class="img-responsive">
             {% endif %}
-            {% if item['rating'] == 0 %}
-            <p class="movieRating mb-0">Rating: N/A</p>
+            {% if item['rating'] == 0 or 'rating' not in item %}
+            <p class="movieRating">Rating: -</p>
             {% else %}
             <p class="movieRating mb-0">Rating: {{item['rating']}}</p>
             {% endif %}
@@ -50,10 +50,10 @@
                     </form>
                     {% elif not g.user %}
                     <a href="{{ url_for('login', next=item['id']) }}"><button type="button" id="details_login_button"
-                            class="btn btn-outline-dark mb-1">Login</button></a>
+                            class="btn mb-1">Login</button></a>
                     {% elif not g.user.confirmed %}
                     <a href="{{ url_for('unconfirmed')}}"><button type="button" id="details_login_button"
-                            class="btn btn-outline-dark mb-1">Confirm</button></a>
+                            class="btn mb-1">Confirm</button></a>
                     {% endif %}
                     <a href="{{ url }}"><button type="button" id="details_button"
                             class="btn btn-dark mb-1">Details</button></a>
@@ -63,12 +63,12 @@
         {% endfor %}
         <div class="d-flex justify-content-center">
             {% if page > 1 %}
-            <a href="{{ url_for('popular', page=page-1) }}"><button type="button" class="btn btn-dark"
-                    class="btn btn-dark mb-1 me-5">Prev Page</button></a>
+            <a href="{{ url_for('popular', page=page-1) }}"><button type="button" id="prev-page"
+                    class="btn btn-outline-dark me-2">&larr; Prev Page</button></a>
             {% endif %}
             {% if page < pageCount %}
-            <a href="{{ url_for('popular', page=page+1) }}"><button type="button" class="btn btn-dark"
-                    class="btn btn-dark mb-1">Next Page</button></a>
+            <a href="{{ url_for('popular', page=page+1) }}"><button type="button" id="next-page"
+                    class="btn btn-dark">Next Page &rarr;</button></a>
             {% endif %}
         </div>
     </div>

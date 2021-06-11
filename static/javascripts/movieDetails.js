@@ -18,17 +18,20 @@ $(window).on('load', function () {
 // Script for scrolling through related movies
 const leftScroll = document.querySelector('#slideLeft');
 const rightScroll = document.querySelector('#slideRight');
+const cover = document.querySelector('.relatedMovieCover img')
 
 if (leftScroll) {
     leftScroll.addEventListener("click", () => {
+        const distance = cover.scrollWidth * 2 + 8
         const container = document.querySelector('#related');
-        sideScroll(container, 'left', 10, 470, 10);
+        sideScroll(container, 'left', 10, distance, 5);
     })
 }
 if (leftScroll) {
     rightScroll.addEventListener("click", () => {
+        const distance = cover.scrollWidth * 2 + 8
         const container = document.querySelector('#related');
-        sideScroll(container, 'right', 10, 470, 10);
+        sideScroll(container, 'right', 10, distance, 5);
     })
 }
 

@@ -5,6 +5,40 @@
 {% endblock %}
 
 {% block content %}
+<div class="sort-wrapper col-12 mb-sm-0 my-3">
+    <select name="sort_by" id="sort_by" onchange="location = this.value;">
+        <option value="#">---Sort By:---</option>
+        {% if sort_by == 'popularity.desc' %}
+        <option selected
+            value="{{ url_for('genres', genre=genre, genrename=genrename, mediaType=mediaType, sort_by='popularity.desc') }}">
+            Popularity Descending</option>
+        {% else %}
+        <option
+            value="{{ url_for('genres', genre=genre, genrename=genrename, mediaType=mediaType, sort_by='popularity.desc') }}">
+            Popularity Descending</option>
+        {% endif %}
+        {% if sort_by == 'primary_release_date.asc' %}
+        <option selected
+            value="{{ url_for('genres', genre=genre, genrename=genrename, mediaType=mediaType, sort_by='primary_release_date.asc') }}">
+            Release Date Ascending
+        </option>
+        {% else %}
+        <option
+            value="{{ url_for('genres', genre=genre, genrename=genrename, mediaType=mediaType, sort_by='primary_release_date.asc') }}">
+            Release Date Ascending</option>
+        {% endif %}
+        {% if sort_by == 'primary_release_date.desc' %}
+        <option selected
+            value="{{ url_for('genres', genre=genre, genrename=genrename, mediaType=mediaType, sort_by='primary_release_date.desc') }}">
+            Release Date Descending
+        </option>
+        {% else %}
+        <option
+            value="{{ url_for('genres', genre=genre, genrename=genrename, mediaType=mediaType, sort_by='primary_release_date.desc') }}">
+            Release Date Descending</option>
+        {% endif %}
+    </select>
+</div>
 
 <div class="resultsContainer mt-5 no-gutters p-md-5 p-sm-2">
     <div class="row no-gutters justify-content-center">
@@ -21,7 +55,7 @@
                     {{ item['name'][0:19] }}...
                     {% endif %}
                 </p>
-                <p class="m-0 mb-1">({{item['release']}})</p>
+                <p class="m-0 mb-1">{{item['release_date']}}</p>
             </div>
             {% if item['cover'] == 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None' %}
             <img id="movie_cover" src="{{ url_for('static', filename='err_img.gif') }}" alt="movie poster"
@@ -29,13 +63,16 @@
             {% else %}
             <img id="movie_cover" src="{{ item['cover'] }}" alt="movie poster" class="img-responsive">
             {% endif %}
-            {% if item['rating'] == 0 %}
+            {% if item['rating'] == 0 or 'rating' not in item %}
             <p class="movieRating">Rating: N/A</p>
             {% else %}
             <p class="movieRating">Rating: {{item['rating']}}</p>
             {% endif %}
             <div class="btn-group btnGroup">
-                {% if g.user and item['type'] != 'tv' and g.user.confirmed %}
+                {% if mediaType == 'tv' %}
+                <button type="button" id="details_login_button" class="btn btn-outline-dark mb-1"
+                    disabled>Follow</button>
+                {% elif g.user and mediaType != 'tv' and g.user.confirmed%}
                 <form method="post">
                     <button type="submit" name="movie_id" id="details_follow_button" value="{{item['id']}}"
                         class="btn btn-outline-danger mb-1"><svg xmlns="http://www.w3.org/2000/svg" width="16"
@@ -46,26 +83,26 @@
                 </form>
                 {% elif not g.user %}
                 <a href="{{ url_for('login', next=item['id']) }}"><button type="button" id="details_login_button"
-                        class="btn btn-outline-dark mb-1">Login</button></a>
+                        class="btn mb-1">Login</button></a>
                 {% elif not g.user.confirmed %}
                 <a href="{{ url_for('unconfirmed')}}"><button type="button" id="details_login_button"
-                        class="btn btn-outline-dark mb-1">Confirm</button></a>
+                        class="btn mb-1">Confirm</button></a>
                 {% endif %}
                 <a href="{{ url }}"><button type="button" id="details_button"
                         class="btn btn-dark mb-1">Details</button></a>
             </div>
         </div>
         {% endfor %}
-        <div class="d-flex justify-content-center">
+        <div class="d-flex justify-content-center btnGroup">
             {% if page > 1 %}
             <a href="{{ url_for('genres', genre=genre, genrename=genrename, mediaType=mediaType, page=page-1) }}"><button
-                    type="button" class="btn btn-dark me-5" class="btn btn-dark mb-1">Prev
+                    type="button" id="prev-page" class="btn btn-outline-dark me-2">&larr; Prev
                     Page</button></a>
             {% endif %}
             {% if page < pageCount %}
             <a href="{{ url_for('genres', genre=genre, genrename=genrename, mediaType=mediaType, page=page+1) }}"><button
-                    type="button" class="btn btn-dark" class="btn btn-dark mb-1">Next
-                    Page</button></a>
+                    type="button" id="next-page" class="btn btn-dark">Next
+                    Page &rarr;</button></a>
             {% endif %}
         </div>
     </div>

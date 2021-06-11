@@ -1,12 +1,39 @@
 {% extends 'base.html' %}
 
 {% block header %}
-<h1 class="text-center mt-5">{% block title %}Upcoming Movies{% endblock %}</h1>
+<h1 class="text-center pt-lg-5">{% block title %}Upcoming Movies{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
+<div class="sort-wrapper col-12 mb-sm-0 my-3">
+    <select name="sort_by" id="sort_by" onchange="location = this.value;">
+        <option value="#">---Sort By:---</option>
+        {% if sort_by == 'popularity.asc' %}
+        <option selected value="{{ url_for('upcoming', sort_by='popularity.asc') }}">Popularity Ascending</option>
+        {% else %}
+        <option value="{{ url_for('upcoming', sort_by='popularity.asc') }}">Popularity Ascending</option>
+        {% endif %}
+        {% if sort_by == 'popularity.desc' %}
+        <option selected value="{{ url_for('upcoming', sort_by='popularity.desc') }}">Popularity Descending</option>
+        {% else %}
+        <option value="{{ url_for('upcoming', sort_by='popularity.desc') }}">Popularity Descending</option>
+        {% endif %}
+        {% if sort_by == 'primary_release_date.asc' %}
+        <option selected value="{{ url_for('upcoming', sort_by='primary_release_date.asc') }}">Release Date Ascending
+        </option>
+        {% else %}
+        <option value="{{ url_for('upcoming', sort_by='primary_release_date.asc') }}">Release Date Ascending</option>
+        {% endif %}
+        {% if sort_by == 'primary_release_date.desc' %}
+        <option selected value="{{ url_for('upcoming', sort_by='primary_release_date.desc') }}">Release Date Descending
+        </option>
+        {% else %}
+        <option value="{{ url_for('upcoming', sort_by='primary_release_date.desc') }}">Release Date Descending</option>
+        {% endif %}
+    </select>
+</div>
 
-<div class="resultsContainer mt-5 no-gutters p-md-5 p-sm-2">
+<div class="resultsContainer no-gutters p-lg-5 p-sm-2">
     <div class="row no-gutters justify-content-center">
         {% for item in results %}
         {% set url = url_for('details', id=item['id'], mediaType='movie') %}
@@ -41,10 +68,10 @@
                     </form>
                     {% elif not g.user %}
                     <a href="{{ url_for('login', next=item['id']) }}"><button type="button" id="details_login_button"
-                            class="btn btn-outline-dark mb-1">Login</button></a>
+                            class="btn mb-1">Login</button></a>
                     {% elif not g.user.confirmed %}
                     <a href="{{ url_for('unconfirmed')}}"><button type="button" id="details_login_button"
-                            class="btn btn-outline-dark mb-1">Confirm</button></a>
+                            class="btn mb-1">Confirm</button></a>
                     {% endif %}
                     <a class="details_link" href="{{ url_for('details', id=item['id'], mediaType='movie') }}"><button
                             type="button" id="details_button" class="btn btn-dark mb-1">Details</button></a>
@@ -52,16 +79,17 @@
             </form>
         </div>
         {% endfor %}
-        <!-- <div class="d-flex justify-content-center">
+        <div class="d-flex justify-content-center">
             {% if page > 1 %}
-            <a href="{{ url_for('upcoming', page=page-1) }}"><button type="button" class="btn btn-dark me-5"
-                    class="btn btn-dark mb-1">Prev Page</button></a>
+            <a href="{{ url_for('upcoming', page=page-1, sort_by=sort_by) }}"><button type="button" id="prev-page"
+                    class="btn btn-outline-dark me-2">&larr; Prev
+                    Page</button></a>
             {% endif %}
             {% if page < pageCount %}
-            <a href="{{ url_for('upcoming', page=page+1) }}"><button type="button" class="btn btn-dark"
-                    class="btn btn-dark mb-1">Next Page</button></a>
+            <a href="{{ url_for('upcoming', page=page+1, sort_by=sort_by) }}"><button type="button" id="next-page"
+                    class="btn btn-dark">Next Page &rarr;</button></a>
             {% endif %}
-        </div> -->
+        </div>
     </div>
     <script src="{{ url_for('static', filename='javascripts/movieResults.js') }}"></script>
     {% endblock %}

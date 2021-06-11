@@ -1,11 +1,23 @@
 {% extends 'base.html' %}
 
 {% block header %}
-<h1 class="text-center mt-5">{% block title %}Results For: {{ query }}{% endblock %}</h1>
+<h1 class="text-center pt-5">{% block title %}Results For:
+    {% if name %}
+    {{ name }}
+    {% else %}
+    {{ query }}
+    {% endif %}
+    {% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
+{% if name %}
+<div class="sort-wrapper col-12 mb-sm-0 my-3">
+    <a href="{{ url_for('profile', id=query)}}"><img class="mb-1" src="{{ url_for('static' , filename='user.png') }}"
+            alt="profile picture" width='30' height='30'> Back to Profile</a>
+</div>
 
+{% endif %}
 <div class="resultsContainer mt-5 no-gutters p-md-5 p-sm-2">
     <div class="row no-gutters justify-content-center">
         {% for item in results %}
@@ -26,7 +38,11 @@
                     {{ item['name'][0:19] }}...
                     {% endif %}
                 </p>
+                {% if item['type'] != 'person' %}
                 <p class="m-0 mb-1">({{item['release']}})</p>
+                {% elif item['type'] == 'person' %}
+                <p class="m-0 mb-1">Known For: {{item['release']}}</p>
+                {% endif %}
             </div>
             {% if item['cover'] == 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None' %}
             <img id="movie_cover" src="{{ url_for('static', filename='err_img.gif') }}" alt="movie poster"
@@ -34,33 +50,49 @@
             {% else %}
             <img id="movie_cover" src="{{ item['cover'] }}" alt="movie poster" class="img-responsive">
             {% endif %}
+            {% if item['type'] != 'person' %}
             {% if item['rating'] == 0 or 'rating' not in item %}
             <p class="movieRating">Rating: N/A</p>
             {% else %}
             <p class="movieRating">Rating: {{item['rating']}}</p>
             {% endif %}
+            {% elif item['type'] == 'person'%}
+            <p class="movieRating">Popularity:
+                {% if item['rating'] >= 45 %}
+                ⭐⭐⭐⭐⭐
+                {% elif item['rating'] >= 30 %}
+                ⭐⭐⭐⭐
+                {% elif item['rating'] >= 15 %}
+                ⭐⭐⭐
+                {% elif item['rating'] >= 5 %}
+                ⭐⭐
+                {% elif item['rating'] < 5 %}
+                ⭐
+                {% endif %}
+            </p>
+            {% endif %}
             <div class="btn-group btnGroup">
                 {% if item['type'] == 'tv' %}
-                <button type="button" id="details_login_button" class="btn btn-outline-dark mb-1"
+                <button type="button" id="details_login_button" class="btn btn-outline-dark mb-1 second-btn"
                     disabled>Follow</button>
                 {% elif item['type'] == 'person' %}
-                <a href="{{ url_for('peoplemovies', id=item['id']) }}"><button type="button" id="details_login_button"
-                        class="btn btn-outline-dark mb-1">Movies</button></a>
+                <a href="{{ url_for('peoplemovies', id=item['id'], name=item['name']) }}"><button type="button"
+                        id="details_login_button" class="btn btn-outline-dark mb-1 second-btn">🎥</button></a>
                 {% elif g.user and item['type'] != 'tv' and g.user.confirmed%}
                 <form method="post">
                     <button type="submit" name="movie_id" id="details_follow_button" value="{{item['id']}}"
-                        class="btn btn-outline-danger mb-1"><svg xmlns="http://www.w3.org/2000/svg" width="16"
-                            height="16" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
+                        class="btn btn-outline-danger mb-1 second-btn"><svg xmlns="http://www.w3.org/2000/svg"
+                            width="16" height="16" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
                             <path fill-rule="evenodd"
                                 d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z" />
                         </svg></button>
                 </form>
                 {% elif not g.user %}
                 <a href="{{ url_for('login', next=item['id']) }}"><button type="button" id="details_login_button"
-                        class="btn btn-outline-dark mb-1">Login</button></a>
+                        class="btn mb-1 second-btn">Login</button></a>
                 {% elif not g.user.confirmed %}
                 <a href="{{ url_for('unconfirmed')}}"><button type="button" id="details_login_button"
-                        class="btn btn-outline-dark mb-1">Confirm</button></a>
+                        class="btn mb-1">Confirm</button></a>
                 {% endif %}
                 <a href="{{ url }}"><button type="button" id="details_button"
                         class="btn btn-dark mb-1">Details</button></a>
@@ -69,12 +101,13 @@
         {% endfor %}
         <div class="d-flex justify-content-center">
             {% if page > 1 %}
-            <a href="{{ url_for('results', query=query, page=page-1) }}"><button type="button" class="btn btn-dark"
-                    class="btn btn-dark mb-1 me-5">Prev Page</button></a>
+            <a href="{{ url_for('results', query=query, page=page-1) }}"><button type="button" id="prev-page"
+                    class="btn btn-outline-dark me-2">&larr; Prev
+                    Page</button></a>
             {% endif %}
             {% if page < pageCount %}
-            <a href="{{ url_for('results', query=query, page=page+1) }}"><button type="button" class="btn btn-dark"
-                    class="btn btn-dark mb-1">Next Page</button></a>
+            <a href="{{ url_for('results', query=query, page=page+1) }}"><button type="button" id="next-page"
+                    class="btn btn-dark">Next Page &rarr;</button></a>
             {% endif %}
         </div>
     </div>

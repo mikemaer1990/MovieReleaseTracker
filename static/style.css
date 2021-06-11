@@ -1,11 +1,83 @@
-:root {
+:root[color-mode="light"] {
   --main-gray: #1c1f23;
-  --main-white: #fff;
+  --main-white: #f2f3f4;
   --main-font: black;
   --main-hover-gray: #15171a;
-  --navbar-height: 66px;
-  --navbar-mobile-height: 57.22px;
+  --login-btn-color: #f2f3f4;
+  --login-border-color: black;
+  --like-btn-color: var(--main-white);
+  --like-btn-border: rgb(220, 53, 69);
+  --like-btn-heart: rgb(220, 53, 69);
+  --box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 1px,
+    rgba(60, 64, 67, 0.15) 0px 2px 6px 3px;
 }
+:root[color-mode="dark"] {
+  --main-gray: #616e7c;
+  --main-white: #1f2933;
+  --main-font: #f2f2f2;
+  --main-hover-gray: #717d8e;
+  --login-btn-color: #ecc68d;
+  --login-border-color: transparent;
+  --like-btn-color: #ecc68d;
+  --like-btn-border: transparent;
+  --like-btn-heart: #616e7c;
+  --box-shadow: rgba(176, 196, 222, 0.753) 0px 1px 2px 1px,
+    rgba(176, 196, 222, 0.37) 0px 2px 6px 3px;
+}
+:root {
+  --navbar-height: 58px;
+  --navbar-mobile-height: 57.22px;
+  --border-radius: 5px;
+  --always-white: #f2f3f4;
+}
+/*---------------------- Dark mode styles --------------------*/
+/* Any element with the class "light--hidden" will be hidden when the site is set to Light Mode */
+:root[color-mode="light"] .light--hidden {
+  display: none;
+}
+
+/* Any element with the class "dark--hidden" will be hidden when the site is set to Dark Mode */
+:root[color-mode="dark"] .dark--hidden {
+  display: none;
+}
+
+* {
+  transition: background-color 0.6s ease, color 1s ease;
+}
+.color-mode__btn {
+  position: absolute;
+  top: 15px;
+  right: 257px;
+  border-radius: 50%;
+  background-color: transparent;
+  color: var(--main-white);
+  transition: -webkit-filter 0.25s ease;
+  transition: filter 0.25s ease;
+  transition: filter 0.25s ease, -webkit-filter 0.25s ease;
+}
+.color-mode__btn:hover {
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.color-mode__btn.not-reg {
+  right: 160px;
+  top: 13px;
+}
+
+#details_follow_button {
+  background-color: var(--like-btn-color);
+  border-color: var(--like-btn-border);
+  color: var(--like-btn-heart);
+}
+#details_follow_button:hover {
+  background-color: var(--like-btn-heart);
+  border-color: var(--like-btn-border);
+  color: var(--like-btn-color);
+}
+
+/* End dark mode styles */
+
 html {
   height: 100vh;
   width: 100vw;
@@ -15,6 +87,7 @@ html {
 body {
   font-family: "Josefin Sans", sans-serif !important;
   overflow-x: hidden;
+  color: var(--main-font);
 }
 
 a {
@@ -37,9 +110,15 @@ form a:link {
 form a {
   color: rgb(242, 243, 234);
 }
-.content,
+
 body {
   background-color: var(--main-white);
+}
+.testie {
+  min-height: calc(100vh - var(--navbar-height));
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .btn-dark {
   background-color: var(--main-gray);
@@ -47,6 +126,42 @@ body {
 }
 .btn-dark:hover {
   background-color: var(--main-hover-gray);
+}
+
+.navbar-light .navbar-toggler {
+  color: var(--main-font);
+  fill: var(--main-font);
+}
+.navbar-nav .nav-link {
+  color: var(--main-font) !important;
+}
+.navbar-nav .nav-link:hover {
+  color: darkcyan !important;
+}
+#hidden {
+  display: none;
+}
+.btn-close {
+  width: 15px;
+  background-size: 15px;
+}
+.modal-body {
+  font-size: 0.7em;
+}
+.modal-content {
+  background-color: rgba(255, 255, 255, 0.849);
+}
+.form-check *:hover {
+  cursor: pointer;
+}
+.form-check-input:checked[type="checkbox"]#inlineCheckbox1 {
+  background-image: url("theatre.png");
+}
+.form-check-input:checked[type="checkbox"]#inlineCheckbox2 {
+  background-image: url("digital.png");
+}
+.form-check-label {
+  padding-top: 0.34rem;
 }
 .input-group select {
   background-color: var(--main-gray);
@@ -56,6 +171,11 @@ body {
 .input-group select:hover {
   cursor: pointer;
 }
+.power-button svg {
+  fill: var(--main-font);
+  width: 20px;
+  height: 20px;
+}
 .power-button:hover {
   opacity: 0.8;
 }
@@ -64,7 +184,7 @@ body {
   background: var(--main-gray);
 }
 .dropdown-item {
-  color: var(--main-white);
+  color: var(--always-white);
 }
 .dropdown-menu li {
   position: relative;
@@ -74,6 +194,20 @@ body {
   position: absolute;
   left: 100%;
   top: -7px;
+}
+
+/* Flash message styles */
+.danger {
+  background-color: rgba(255, 0, 0, 0.404) !important;
+  border: 1px solid var(--main-gray) !important;
+}
+.warning {
+  background-color: rgba(255, 245, 111, 0.61) !important;
+  border: 1px solid var(--main-gray) !important;
+}
+.success {
+  background-color: rgba(26, 121, 48, 0.473) !important;
+  border: 1px solid var(--main-gray) !important;
 }
 .dropdown-menu > li:hover > .dropdown-submenu {
   display: block;
@@ -87,7 +221,7 @@ body {
 .outsetBorderWhite {
   border: 3px outset rgb(151, 143, 143);
   background-color: whitesmoke;
-  border-radius: 5px;
+  border-radius: var(--border-radius);
   padding: 8px;
 }
 div.outsetBorderWhite {
@@ -96,6 +230,25 @@ div.outsetBorderWhite {
 .formTop {
   position: relative;
   top: -5%;
+}
+#movieContainer .movieRating {
+  margin-top: 1rem !important;
+}
+
+.sort-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#sort_by {
+  background-color: var(--main-gray);
+  border-color: var(--main-white);
+  border-radius: var(--border-radius);
+  color: var(--always-white);
+  padding: 0.5rem 0.25rem 0.25rem 0.25rem;
+}
+#sort_by:hover {
+  cursor: pointer;
 }
 .unconfirmed-wrapper {
   display: flex;
@@ -135,10 +288,10 @@ div.outsetBorderWhite {
   text-align: center;
 }
 .transparent-details-bg {
-  background-color: rgba(255, 255, 255, 0.137);
+  background-color: rgba(255, 255, 255, 0.137) !important;
 }
 .transparent-details-bg:hover {
-  background-color: rgba(255, 255, 255, 0.664);
+  background-color: rgba(255, 255, 255, 0.664) !important;
 }
 section .details h3 {
   font-size: 1.7em;
@@ -149,23 +302,36 @@ section .details h3 {
   margin: 2% auto;
   padding: 2rem;
   display: grid;
+  color: black;
   grid-template-columns: 275px 1fr;
-  grid-template-rows: 1fr 0.77fr auto 0.39fr;
+  grid-template-rows: 1fr 0.77fr auto auto;
   grid-template-areas:
     "coverart details"
     "coverart overview"
     "links related"
-    "none related";
+    "links related";
   max-height: 100%;
-  width: 60%;
+  width: 80%;
+  max-width: 1145px;
   gap: 1rem;
-  color: var(--main-font);
 }
 .details-backdrop {
   padding: 1.5rem 0 1rem 0;
-  min-height: calc(100vh - 66px) !important;
+  min-height: calc(100vh - var(--navbar-height)) !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-
+.sort-wrapper a {
+  text-decoration: none;
+  transition: all 1s cubic-bezier(0.19, 1, 0.22, 1);
+  color: rgba(0, 0, 0, 0.549);
+}
+.sort-wrapper a:hover {
+  -webkit-filter: brightness(10%);
+  filter: brightness(10%);
+  color: rgba(0, 0, 0, 0.726);
+}
 .related {
   display: flex;
   grid-area: related;
@@ -180,6 +346,7 @@ section .details h3 {
 
 .relatedMovieCover {
   display: inline-block;
+  border-right: 1px solid var(--main-gray);
 }
 
 .relatedMovieCover img {
@@ -215,7 +382,7 @@ section .details h3 {
 }
 .watchProvidersButton {
   background-image: linear-gradient(45deg, #151d94, #00aeffbb);
-  border-radius: 5px;
+  border-radius: var(--border-radius);
   border: none;
   padding: 8px;
   transition: all 0.5s;
@@ -227,7 +394,7 @@ section .details h3 {
 
 .cover img {
   width: 100%;
-  border-radius: 5px 5px 0 0;
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
 }
 
 .links button {
@@ -260,7 +427,7 @@ section .details h3 {
 .mobileTrailer {
   display: none;
   grid-area: mobileTrailer;
-  widows: 100%;
+  width: 100%;
 }
 .details {
   grid-area: details;
@@ -274,17 +441,22 @@ section .details h3 {
 
 .links {
   grid-area: links;
-  border-radius: 5px;
+  border-radius: var(--border-radius);
+  align-self: self-end;
+}
+.details-links-wrapper {
+  display: flex;
+  flex-direction: column;
 }
 
-section .links a {
+/* section .links a {
   text-decoration: none;
-}
+} */
 .detailsYear {
   color: rgba(0, 0, 0, 0.664);
 }
 .imdbImage {
-  width: 80px;
+  width: 40px;
 }
 .rtImage {
   width: 40px;
@@ -312,7 +484,7 @@ section .links a {
   max-height: 100%;
   width: 60%;
   gap: 1rem;
-  color: var(--main-font);
+  color: black;
 }
 
 .profileCover {
@@ -345,7 +517,12 @@ section .links a {
   overflow-y: hidden;
   scrollbar-width: none;
 }
-
+.dark-mode {
+  color: #e0e0e0 !important;
+}
+.dark-mode-bg {
+  background-color: #121212;
+}
 .profilePics::-webkit-scrollbar {
   display: none;
 }
@@ -358,10 +535,12 @@ section .links a {
 .profilePicsPictures img {
   height: 230px;
   overflow: visible;
+  border-right: 1px solid var(--main-gray);
 }
 .profileRelatedMovieCover img {
   height: 230px;
   overflow: visible;
+  border-right: 1px solid var(--main-gray);
 }
 
 .profileRelatedMovieCover img:hover,
@@ -399,6 +578,7 @@ section .links a {
   background: #cae6f6;
   border: 1px solid #377ba8;
   text-align: center;
+  color: black;
 }
 #slideLeft {
   position: absolute;
@@ -479,10 +659,11 @@ input[type="select"]:target {
 
 #followsTable {
   margin-bottom: 5rem;
+  color: var(--main-font);
 }
 
 #profileImg {
-  border-radius: 5px;
+  border-radius: var(--border-radius);
 }
 
 #search_container {
@@ -493,9 +674,9 @@ input[type="select"]:target {
   transform: translate(-50%, -50%);
   padding: 1rem;
   text-align: center;
-  border: 3px outset var(--main-gray);
+  border: 3px outset var(--main-font);
   background-color: #100f0f14;
-  border-radius: 5px;
+  border-radius: var(--border-radius);
   max-width: 479px;
 }
 
@@ -519,7 +700,7 @@ input[type="select"]:target {
   max-height: 300px;
   overflow-y: scroll;
   z-index: 3;
-  border-radius: 0 0 5px 5px;
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
 }
 .search-results li {
   background-color: var(--main-gray);
@@ -567,10 +748,11 @@ input[type="select"]:target {
   flex-direction: column;
   align-items: center;
   justify-content: space-around;
-  max-height: 513px !important;
-  border: 2px solid;
+  padding-bottom: 0.5rem;
+  /* max-height: 513px !important; */
+  /* border: 1px inset var(--main-gray); */
   border-radius: 9.5px;
-  box-shadow: 3px 3px 3px 1px #888888;
+  box-shadow: var(--box-shadow);
   -webkit-animation: shadow_out 0.25s ease-in-out;
   animation: shadow_out 0.25s ease-in-out;
   transition: transform 0.15s;
@@ -578,11 +760,6 @@ input[type="select"]:target {
 
 #movieContainer:hover {
   cursor: pointer;
-  transform: scale(1.005);
-  -webkit-animation: shadow_in 0.25s ease-in-out;
-  animation: shadow_in 0.25s ease-in-out;
-  -webkit-animation-fill-mode: forwards;
-  animation-fill-mode: forwards;
 }
 
 #followsCover {
@@ -597,26 +774,42 @@ input[type="select"]:target {
 
 /* Classes to be used in javascript mouseenter and leave events */
 .dark-hover-btn {
-  background-color: var(--main-gray);
-  color: var(--main-white);
+  background-color: var(--main-gray) !important;
+  color: var(--always-white) !important;
 }
 .light-hover-btn {
-  background-color: var(--main-white);
-  color: var(--main-gray);
+  background-color: var(--login-btn-color) !important;
+  color: var(--main-font) !important;
+}
+
+.resultsContainer #details_login_button,
+.resultsContainer #details_follow_button {
+  border-radius: var(--border-radius) 0 0 var(--border-radius) !important;
+  transition: all 0.35s ease;
 }
 
 .resultsContainer #details_login_button {
-  border-radius: 5px 0 0 5px !important;
-  transition: all 0.35s ease;
+  background: var(--login-btn-color);
+  border: 1px solid var(--login-border-color);
+  color: var(--main-font);
+}
+.resultsContainer #details_login_button:hover {
+  background: var(--main-gray);
+  color: var(--always-white);
 }
 
 .resultsContainer #details_button {
-  border-radius: 0 5px 5px 0 !important;
+  border-radius: 0 var(--border-radius) var(--border-radius) 0 !important;
   transition: all 0.35s ease;
+  border: 1px solid var(--main-gray);
 }
-#details_button:hover {
+.resultsContainer #details_button:hover {
+  background: var(--login-btn-color);
+}
+#details_button:hover,
+#next-page:hover {
   background-color: var(--main-white);
-  color: var(--main-gray);
+  color: var(--main-font);
 }
 #inputGroup-sizing-default:hover {
   background-color: #1f252b !important;
@@ -706,49 +899,8 @@ svg:hover #flap {
   }
 }
 
-@-webkit-keyframes shadow_in {
-  from {
-    box-shadow: 3px 3px 3px 1px #888888;
-  }
-
-  to {
-    box-shadow: none;
-  }
-}
-
-@keyframes shadow_in {
-  from {
-    box-shadow: 3px 3px 3px 1px #888888;
-  }
-
-  to {
-    box-shadow: none;
-  }
-}
-
-@-webkit-keyframes shadow_out {
-  from {
-    box-shadow: none;
-  }
-
-  to {
-    box-shadow: 3px 3px 3px 1px #888888;
-  }
-}
-
-@keyframes shadow_out {
-  from {
-    box-shadow: none;
-  }
-
-  to {
-    box-shadow: 3px 3px 3px 1px #888888;
-  }
-}
-
 /* VIDEO LIGHTBOX STYLES */
 /* SRC: https://github.com/sricharankrishnan/click-image-play-youtube-video/blob/master/README.md */
-/* This stylesheet is exclusively for the plugin. Incase you would like to make some changes, would recommend you import this in your stylesheet and then make the changes as per your liking. */
 .videoPlayerOverlay {
   position: fixed;
   top: 0;
@@ -826,7 +978,6 @@ svg:hover #flap {
 }
 
 @media only screen and (max-width: 1500px) {
-  .detailsContainer,
   .profileContainer {
     width: 80%;
     font-size: 0.95em;
@@ -862,6 +1013,9 @@ svg:hover #flap {
 }
 
 @media only screen and (max-width: 992px) {
+  .relatedMovieCover {
+    padding-right: 2px;
+  }
   .details-backdrop {
     min-height: calc(100vh - var(--navbar-mobile-height)) !important;
   }
@@ -915,7 +1069,7 @@ svg:hover #flap {
   }
 
   .links {
-    min-height: 100px !important;
+    align-self: flex-start;
   }
 
   .cover img {
@@ -946,12 +1100,12 @@ svg:hover #flap {
   }
 
   #slideLeft {
-    top: 64%;
+    top: 69%;
     left: 57px;
   }
 
   #slideRight {
-    top: 61%;
+    top: 65%;
     right: 58px;
   }
 
@@ -976,6 +1130,23 @@ svg:hover #flap {
   #profileImg {
     height: 298px;
   }
+  .power-button:hover {
+    cursor: pointer;
+  }
+  .power-button svg {
+    display: none;
+  }
+  .power-button::before {
+    content: "Logout";
+  }
+  .color-mode__btn {
+    right: 119px;
+  }
+
+  .color-mode__btn.not-reg {
+    right: 115px;
+    top: 14px;
+  }
   /* DO YOU NEED THIS????/ */
   @media only screen and (max-height: 900px) {
     #detailsContainer {
@@ -983,11 +1154,6 @@ svg:hover #flap {
     }
   }
 
-  @media only screen and (min-height: 950px) {
-    .detailsContainer {
-      margin: 10% auto;
-    }
-  }
   @media only screen and (max-width: 900px) {
     #movieDetailsContainer {
       width: 55%;
@@ -997,6 +1163,11 @@ svg:hover #flap {
     }
   }
 
+  @media only screen and (max-width: 768px) {
+    .resultsContainer {
+      margin-top: 1rem;
+    }
+  }
   @media only screen and (max-width: 750px) {
     #movieDetailsContainer {
       border: none !important;
@@ -1068,8 +1239,16 @@ svg:hover #flap {
       grid-template-columns: 128px 1fr;
       grid-template-rows: 200px 0.8fr 1fr 1fr 0.1fr;
     }
+    /* .links {
+    align-self: flex-start;
+    margin-bottom: 1rem;
+  } */
   }
-
+  @media only screen and (max-width: 610px) {
+    .profilePics {
+      justify-self: auto !important;
+    }
+  }
   @media only screen and (max-width: 575px) {
     #movieContainer {
       display: grid;
@@ -1140,7 +1319,7 @@ svg:hover #flap {
     .mobileTrailer button {
       margin: 1px auto;
       width: 99%;
-      border-radius: 5px;
+      border-radius: var(--border-radius);
       color: white;
       font-size: larger;
     }
@@ -1156,13 +1335,12 @@ svg:hover #flap {
       height: 160px;
       width: 103.5%;
       border: 3px outset var(--main-font);
-      background-color: whitesmoke;
-      border-radius: 5px;
+      border-radius: var(--border-radius);
     }
     .cover img {
       width: 135px;
       height: 153.8px;
-      border-radius: 5px;
+      border-radius: var(--border-radius);
     }
 
     section .details {
@@ -1234,7 +1412,7 @@ svg:hover #flap {
       width: 103.5%;
       border: 3px outset var(--main-font);
       background-color: whitesmoke;
-      border-radius: 5px;
+      border-radius: var(--border-radius);
     }
 
     section .profilePics {
