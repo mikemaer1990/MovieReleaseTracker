@@ -1037,8 +1037,8 @@ svg:hover #flap {
 
   #search_container {
     width: 90%;
-    position: relative;
-    transform: translate(-50%, 25vh);
+    /* position: relative;
+    transform: translate(-50%, 25vh); */
   }
 
   .detailsContainer {
