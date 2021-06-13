@@ -2,6 +2,7 @@ import os
 import configuration
 import re
 import requests
+import math
 
 from datetime import date
 from dateutil.relativedelta import relativedelta
@@ -116,8 +117,9 @@ def results():
         adult = 'false'
         pass
     # New multisearch function implementation
-    pageCount = requests.get(
-        f"https://api.themoviedb.org/3/search/multi?api_key={configuration.API_KEY_STORAGE}&language=en-US&query={query}&include_adult={adult}&region=US").json()["total_pages"] / page_chunk
+    pageCount = math.ceil(requests.get(
+        f"https://api.themoviedb.org/3/search/multi?api_key={configuration.API_KEY_STORAGE}&language=en-US&query={query}&include_adult={adult}&region=US").json()["total_pages"] / page_chunk)
+    print(pageCount)
     page = request.args.get('page')
     if page is None:
         page = 1
@@ -206,8 +208,8 @@ def upcoming():
     # Get sort by preference --- default is popularity descending
     sort_by = request.args.get('sort_by') or 'popularity.desc'
     # Get the page count of available results from the API and store it in a variable
-    pageCount = requests.get(
-              f"https://api.themoviedb.org/3/discover/movie?api_key={configuration.API_KEY_STORAGE}&language=en-US&sort_by={sort_by}&include_adult=true&include_video=false&primary_release_date.gte={today}&primary_release_date.lte={three_months_ahead}").json()["total_pages"] / page_chunk
+    pageCount = math.ceil(requests.get(
+              f"https://api.themoviedb.org/3/discover/movie?api_key={configuration.API_KEY_STORAGE}&language=en-US&sort_by={sort_by}&include_adult=true&include_video=false&primary_release_date.gte={today}&primary_release_date.lte={three_months_ahead}").json()["total_pages"] / page_chunk)
     # Get current page
     page = request.args.get('page')
     # Set page value to 1 or if an argument is passed in - that value
@@ -246,8 +248,8 @@ def recent():
     # Get sort by preference --- default is popularity descending
     sort_by = request.args.get('sort_by') or 'popularity.desc'
     # Get the page count of available results from the API and store it in a variable
-    pageCount = requests.get(
-              f"https://api.themoviedb.org/3/discover/movie?api_key={configuration.API_KEY_STORAGE}&language=en-US&sort_by={sort_by}&include_adult=true&include_video=false&primary_release_date.lte={today}&primary_release_date.gte={one_month_behind}").json()["total_pages"] / page_chunk
+    pageCount = math.ceil(requests.get(
+              f"https://api.themoviedb.org/3/discover/movie?api_key={configuration.API_KEY_STORAGE}&language=en-US&sort_by={sort_by}&include_adult=true&include_video=false&primary_release_date.lte={today}&primary_release_date.gte={one_month_behind}").json()["total_pages"] / page_chunk)
     # Get current page
     page = request.args.get('page')
     # Set page value to 1 or if an argument is passed in - that value
@@ -259,8 +261,11 @@ def recent():
     results = lookupRecent(page, sort_by)
     # render template with results
     if request.method == 'GET':
+        # In rare case where recent final page returns an empy list
         if results == []:
-            return redirect(url_for('index'))
+            results = lookupRecent(page - 1, sort_by)
+            pageCount = pageCount - 1
+            return render_template('search/recent.html', results=results, pageCount=pageCount, page=page - 1, sort_by=sort_by)
         return render_template('search/recent.html', results=results, pageCount=pageCount, page=page, sort_by=sort_by)
     # if user clicks the follow button
     elif request.method == 'POST':
@@ -278,8 +283,8 @@ def popular():
     # Set page chunk value
     page_chunk = 2
     # Calculate page count
-    pageCount = requests.get(
-        f"https://api.themoviedb.org/3/movie/popular?api_key={configuration.API_KEY_STORAGE}&language=en-US&region=US").json()["total_pages"] / page_chunk
+    pageCount = math.ceil(requests.get(
+        f"https://api.themoviedb.org/3/movie/popular?api_key={configuration.API_KEY_STORAGE}&language=en-US&region=US").json()["total_pages"] / page_chunk)
     # Get current page
     page = request.args.get('page')
     # Set page to 1 or convert page to an int
@@ -358,15 +363,15 @@ def genres(mediaType, genre, genrename):
     # For movies
     if mediaType == 'movie':
         # Get page count
-        pageCount = requests.get(
-            f"https://api.themoviedb.org/3/discover/movie?api_key={configuration.API_KEY_STORAGE}&language=en-US&sort_by={sort_by}&include_adult=false&include_video=false&with_genres={genre}").json()["total_pages"] / page_chunk
+        pageCount = math.ceil(requests.get(
+            f"https://api.themoviedb.org/3/discover/movie?api_key={configuration.API_KEY_STORAGE}&language=en-US&sort_by={sort_by}&include_adult=false&include_video=false&with_genres={genre}").json()["total_pages"] / page_chunk)
         # Query the api
         searchQuery = lookupGenre('movie', genre, page, sort_by)
     # For TV
     elif mediaType == 'tv':
         # Get the page count
-        pageCount = requests.get(
-            f"https://api.themoviedb.org/3/discover/tv?api_key={configuration.API_KEY_STORAGE}&language=en-US&sort_by={sort_by}&include_adult=false&include_video=false&with_genres={genre}").json()["total_pages"] / page_chunk
+        pageCount = math.ceil(requests.get(
+            f"https://api.themoviedb.org/3/discover/tv?api_key={configuration.API_KEY_STORAGE}&language=en-US&sort_by={sort_by}&include_adult=false&include_video=false&with_genres={genre}").json()["total_pages"] / page_chunk)
         # Query the api
         searchQuery = lookupGenre('tv', genre, page, sort_by)    
     if request.method == 'GET':

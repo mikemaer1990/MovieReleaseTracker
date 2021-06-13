@@ -2,8 +2,7 @@ const loginBtn = [...document.querySelectorAll('.second-btn')]
 const detailsBtn = [...document.querySelectorAll('#details_button')]
 const movieTile = [...document.querySelectorAll('#movieContainer')]
 const movieTitleP = [...document.querySelectorAll('#movie-container-title')]
-const nextButton = document.querySelector('#next-page')
-const prevButton = document.querySelector('#prev-page')
+
 // Alternate colors for the follow and details buttons on the details page
 if (loginBtn.length != 0) {
     loginBtn.forEach(button => button.addEventListener("mouseover", () => {
@@ -20,30 +19,6 @@ if (loginBtn.length != 0) {
     }))
 }
 
-if (nextButton) {
-    nextButton.addEventListener("mouseover", () => {
-        if (prevButton) {
-            prevButton.classList.add('dark-hover-btn')
-        }
-    })
-    nextButton.addEventListener("mouseleave", () => {
-        if (prevButton) {
-            prevButton.classList.remove('dark-hover-btn')
-        }
-    })
-}
-if (prevButton) {
-    prevButton.addEventListener("mouseover", () => {
-        if (nextButton) {
-            nextButton.classList.add('light-hover-btn')
-        }
-    })
-    prevButton.addEventListener("mouseleave", () => {
-        if (nextButton) {
-            nextButton.classList.remove('light-hover-btn')
-        }
-    })
-}
 // Listen for clicks on the movie containers
 movieTile.forEach(movie => movie.addEventListener("click", (e) => {
     handleClick(e)

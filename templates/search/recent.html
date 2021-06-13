@@ -33,12 +33,55 @@
     </select>
 </div>
 
-<div class="resultsContainer no-gutters p-md-5 p-sm-2">
+<div class="d-flex justify-content-center mt-4">
+    {% if page > 1 %}
+    <a href="{{ url_for('recent', page=1, sort_by=sort_by) }}">
+        <button type="button" id="prev-page" class="btn btn-dark me-2">
+            <img src="{{ url_for('static', filename='start.svg') }}" alt="start icon" width="16" height="16">
+        </button>
+    </a>
+    <a href="{{ url_for('recent', page=page-1, sort_by=sort_by) }}">
+        <button type="button" id="prev-page" class="btn btn-dark me-2">
+            <img src="{{ url_for('static', filename='back.svg') }}" alt="start icon" width="16" height="16">
+        </button>
+    </a>
+    {% else %}
+    <button type="button" id="prev-page" class="btn btn-dark me-2" disabled>
+        <img src="{{ url_for('static', filename='start.svg') }}" alt="start icon" width="16" height="16">
+    </button>
+
+    <button type="button" id="prev-page" class="btn btn-dark me-2" disabled>
+        <img src="{{ url_for('static', filename='back.svg') }}" alt="start icon" width="16" height="16">
+    </button>
+
+    {% endif %}
+    {% if page < pageCount %}
+    <a href="{{ url_for('recent', page=page+1, sort_by=sort_by) }}">
+        <button type="button" id="next-page" class="btn btn-dark me-2">
+            <img src="{{ url_for('static', filename='next.svg') }}" alt="start icon" width="16" height="16">
+        </button>
+    </a>
+    <a href="{{ url_for('recent', page=pageCount, sort_by=sort_by) }}">
+        <button type="button" id="next-page" class="btn btn-dark me-2">
+            <img src="{{ url_for('static', filename='end.svg') }}" alt="start icon" width="16" height="16">
+        </button>
+    </a>
+    {% else %}
+    <button type="button" id="next-page" class="btn btn-dark me-2" disabled>
+        <img src="{{ url_for('static', filename='next.svg') }}" alt="start icon" width="16" height="16">
+    </button>
+    <button type="button" id="next-page" class="btn btn-dark me-2" disabled>
+        <img src="{{ url_for('static', filename='end.svg') }}" alt="start icon" width="16" height="16">
+    </button>
+    {% endif %}
+</div>
+
+<div class="resultsContainer mt-0 no-gutters pt-4 mx-3">
     <div class="row no-gutters justify-content-center">
         {% for item in results %}
         {% set url = url_for('details', id=item['id'], mediaType='movie') %}
         <div data-url="{{ url }}" id="movieContainer" title="{{ item['name'] }}"
-            class="text-center col col-xl-2 col-lg-3 col-md-4 col-sm-5 col-12 mx-md-4 mx-sm-3 mb-md-5 mb-sm-4 mb-2">
+            class="text-center col col-xl-2 col-lg-3 col-md-4 col-sm-5 col-12 mx-md-4 mx-sm-3 mb-md-5 mb-sm-4 mb-2 p-0">
             <div class="titleYear">
                 <p id="movie-container-title" class="mt-2 mb-1 boldText" data-title="{{item['name']}}">
                     {% if item['name']|length < 19 %}
@@ -55,8 +98,9 @@
             {% else %}
             <img id="movie_cover" src="{{ item['cover'] }}" alt="movie poster" class="img-responsive">
             {% endif %}
+            <p></p>
             <form method="post">
-                <div class="btn-group btnGroup mt-2">
+                <div class="btn-group btnGroup">
                     {% if g.user and item['type'] != 'tv' and g.user.confirmed %}
                     <form method="post">
                         <button type="submit" name="movie_id" id="details_follow_button" value="{{item['id']}}"
@@ -79,15 +123,46 @@
             </form>
         </div>
         {% endfor %}
-        <div class="d-flex justify-content-center">
+        <div class="d-flex justify-content-center mb-4 mt-4 mt-md-0">
             {% if page > 1 %}
-            <a href="{{ url_for('recent', page=page-1, sort_by=sort_by) }}"><button type="button" id="prev-page"
-                    class="btn btn-outline-dark me-2">&larr; Prev
-                    Page</button></a>
+            <a href="{{ url_for('recent', page=1, sort_by=sort_by) }}">
+                <button type="button" id="prev-page" class="btn btn-dark me-2">
+                    <img src="{{ url_for('static', filename='start.svg') }}" alt="start icon" width="16" height="16">
+                </button>
+            </a>
+            <a href="{{ url_for('recent', page=page-1, sort_by=sort_by) }}">
+                <button type="button" id="prev-page" class="btn btn-dark me-2">
+                    <img src="{{ url_for('static', filename='back.svg') }}" alt="start icon" width="16" height="16">
+                </button>
+            </a>
+            {% else %}
+            <button type="button" id="prev-page" class="btn btn-dark me-2" disabled>
+                <img src="{{ url_for('static', filename='start.svg') }}" alt="start icon" width="16" height="16">
+            </button>
+
+            <button type="button" id="prev-page" class="btn btn-dark me-2" disabled>
+                <img src="{{ url_for('static', filename='back.svg') }}" alt="start icon" width="16" height="16">
+            </button>
+
             {% endif %}
             {% if page < pageCount %}
-            <a href="{{ url_for('recent', page=page+1, sort_by=sort_by) }}"><button type="button" id="next-page"
-                    class="btn btn-dark">Next Page &rarr;</button></a>
+            <a href="{{ url_for('recent', page=page+1, sort_by=sort_by) }}">
+                <button type="button" id="next-page" class="btn btn-dark me-2">
+                    <img src="{{ url_for('static', filename='next.svg') }}" alt="start icon" width="16" height="16">
+                </button>
+            </a>
+            <a href="{{ url_for('recent', page=pageCount, sort_by=sort_by) }}">
+                <button type="button" id="next-page" class="btn btn-dark me-2">
+                    <img src="{{ url_for('static', filename='end.svg') }}" alt="start icon" width="16" height="16">
+                </button>
+            </a>
+            {% else %}
+            <button type="button" id="next-page" class="btn btn-dark me-2" disabled>
+                <img src="{{ url_for('static', filename='next.svg') }}" alt="start icon" width="16" height="16">
+            </button>
+            <button type="button" id="next-page" class="btn btn-dark me-2" disabled>
+                <img src="{{ url_for('static', filename='end.svg') }}" alt="start icon" width="16" height="16">
+            </button>
             {% endif %}
         </div>
     </div>
