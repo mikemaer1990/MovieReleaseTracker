@@ -65,7 +65,8 @@
                 fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
                 <path fill-rule="evenodd"
                   d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z" />
-              </svg></button>
+              </svg>
+            </button>
 
             <!-- Modal -->
             <div class="modal fade" id="releaseDateModal" tabindex="-1" aria-labelledby="releaseDateModal"
@@ -211,8 +212,9 @@
       <section class="follow">
         <form class="formTop" method="post">
           {% if g.user %}
-          <button type="submit" name="movie_id" id="detailsbutton" value="{{item['id']}}"
-            class="btn btn-block btn-danger">Follow</button>
+
+          <button type="button" data-bs-toggle="modal" data-bs-target="#releaseDateModal" name="movie_id"
+            id="detailsbutton" value="{{item['id']}}" class="btn btn-block btn-danger">Follow</button>
           {% else %}
           <a href="{{ url_for('login', next=item['id']) }}"><button type="button" id="details_login_button"
               class="btn btn-block btn-danger">Login to

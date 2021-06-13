@@ -42,8 +42,23 @@
 }
 
 * {
-  transition: background-color 0.6s ease, color 1s ease;
-  -webkit-transition: background-color 0.6s ease, color 1s ease;
+  transition-property: all;
+  -moz-transition-property: all;
+  -webkit-transition-property: all;
+  -o-transition-property: all;
+  -ms-transition-property: all;
+  transition-duration: 0.6s;
+  -webkit-transition-duration: 0.6s;
+  -ms-transition-duration: 0.6s;
+  -moz-transition-duration: 0.6s;
+  -o-transition-duration: 0.6s;
+  transition-timing-function: ease;
+  -webkit-transition-timing-function: ease;
+  -o-transition-timing-function: ease;
+  -ms-transition-timing-function: ease;
+  -moz-transition-timing-function: ease;
+  /* transition: background-color 0.6s ease, color 1s ease;
+  -webkit-transition: background-color 0.6s ease, color 1s ease; */
 }
 .color-mode__btn {
   display: flex;
@@ -759,9 +774,6 @@ input[type="select"]:target {
   /* border: 1px inset var(--main-gray); */
   border-radius: 9.5px;
   box-shadow: var(--box-shadow);
-  -webkit-animation: shadow_out 0.25s ease-in-out;
-  animation: shadow_out 0.25s ease-in-out;
-  transition: transform 0.15s;
 }
 
 #movieContainer:hover {
@@ -1205,8 +1217,7 @@ svg:hover #flap {
       height: 163px;
     }
 
-    section .details .btn-circle,
-    section .details button {
+    section .details .btn-circle {
       display: none;
     }
 
@@ -1353,9 +1364,9 @@ svg:hover #flap {
       max-height: 240px;
     }
 
-    section .details .displayNone {
+    /* section .details .displayNone {
       display: none !important;
-    }
+    } */
 
     section .cover button {
       display: none;
