@@ -119,7 +119,6 @@ def results():
     # New multisearch function implementation
     pageCount = math.ceil(requests.get(
         f"https://api.themoviedb.org/3/search/multi?api_key={configuration.API_KEY_STORAGE}&language=en-US&query={query}&include_adult={adult}&region=US").json()["total_pages"] / page_chunk)
-    print(pageCount)
     page = request.args.get('page')
     if page is None:
         page = 1

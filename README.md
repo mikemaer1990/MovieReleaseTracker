@@ -15,7 +15,7 @@
     <a href="https://github.com/mikemaer1990/moviereleasetracker"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/mikemaer1990/moviereleasetracker">View Demo</a>
+    <a href="https://moviereleasetracker.herokuapp.com">View Demo</a>
     ·
     <a href="https://github.com/mikemaer1990/moviereleasetracker/issues">Report Bug</a>
     ·
@@ -60,6 +60,7 @@
 - [Python](https://www.python.org/)
 - [Flask](https://flask.palletsprojects.com/en/1.1.x/)
 - [PostgreSQL](https://www.postgresql.org/)
+- [Javascript](https://developer.mozilla.org/en-US/docs/Web/javascript/)
 
 <!-- GETTING STARTED -->
 
@@ -71,9 +72,9 @@ To get a local copy up and running follow these simple steps.
 
 This is an example of how to list things you need to use the software and how to install them.
 
-- npm
+- pip
   ```sh
-  npm install npm@latest -g
+  pip install --upgrade pip
   ```
 
 ### Installation
@@ -82,16 +83,16 @@ This is an example of how to list things you need to use the software and how to
    ```sh
    git clone https://github.com/mikemaer1990/moviereleasetracker.git
    ```
-2. Install NPM packages
+2. Install packages
    ```sh
-   npm install
+   pip install -r requirements.txt
    ```
 
 <!-- USAGE EXAMPLES -->
 
-## Usage
+<!-- ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources. -->
 
 <!-- ROADMAP -->
 
