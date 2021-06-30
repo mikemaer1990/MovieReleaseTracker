@@ -41,12 +41,13 @@
   display: none;
 }
 
+/* Transition for dark mode */
 * {
-  transition-property: all;
-  -moz-transition-property: all;
-  -webkit-transition-property: all;
-  -o-transition-property: all;
-  -ms-transition-property: all;
+  transition-property: background-color;
+  -moz-transition-property: background-color;
+  -webkit-transition-property: background-color;
+  -o-transition-property: background-color;
+  -ms-transition-property: background-color;
   transition-duration: 0.6s;
   -webkit-transition-duration: 0.6s;
   -ms-transition-duration: 0.6s;

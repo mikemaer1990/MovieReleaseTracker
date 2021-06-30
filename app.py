@@ -16,8 +16,6 @@ from utilities import login_required, check_confirmed, generate_confirmation_tok
 from emailer import send_release_mail, send_reset_mail, send_confirmation_email
 from datetime import datetime
 
-
-
 # define our flask app
 app = Flask(__name__)
 
