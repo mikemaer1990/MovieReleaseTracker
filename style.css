@@ -1,0 +1,45 @@
+html,
+body {
+  height: 100%;
+}
+body {
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: 50% 50%;
+  margin: 0;
+  font-family: sans-serif;
+}
+.overlay {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.644);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.content {
+  width: 60%;
+  text-align: center;
+}
+h1,
+h2 {
+  margin: 0;
+  padding: 0;
+}
+h1 {
+  color: rgba(255, 255, 255, 0.815);
+  font-size: 30px;
+  display: block;
+}
+h2 {
+  color: rgba(51, 255, 51, 0.89);
+  font-size: 75px;
+  display: block;
+}
+span {
+  color: rgba(245, 236, 236, 0.815);
+  font-size: 20px;
+  display: block;
+  margin-top: 0.3rem;
+}
