@@ -45,6 +45,7 @@ def send_release_mail(recipients, date, subject, img_url, cast):
         print(response.headers)
     except Exception as e:
         print(e.message)
+        print(e)
 
 
 # function that sends an eamil from our SMTP server to reset password via SendGrid // https://app.sendgrid.com/

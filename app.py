@@ -650,7 +650,6 @@ def check_db():
         pass
     # else send emails to users following a movie that releases today
     else:
-        print(releases)
         for release in releases:
             # date format
             date_obj = datetime.strptime(release.movie_date, '%Y-%m-%d')
@@ -664,7 +663,7 @@ def check_db():
             movie = lookupById(release.movie_id)
             movie_poster = movie[0]['cover']
             # Get the first two cast members to put in the email
-            if movie[0]['cast'] != 'N/A':
+            if type(movie[0]['cast']) is list:
                 movie_stars = movie[0]['cast'][0:2]
             else:
                 movie_stars = 'Unknown'
