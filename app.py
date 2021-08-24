@@ -862,12 +862,12 @@ def insert_follows(movie_id, theatre=None, digital=None):
     # For digital releases only
     elif digital == 'digital' and theatre is None:
         release_date = lookupReleaseDate(movie_id)
-        release_date = release_date['digital']['small']
+        release_date = str(release_date['digital']['small'])
         movie_type = 'digital'
     # For theatrical releases only
     elif theatre == 'theatrical' and digital is None:
         release_date = lookupReleaseDate(movie_id)
-        release_date = release_date['theatre']['small']
+        release_date = str(release_date['theatre']['small'])
         movie_type = 'theatrical'
 
     # For input with both release types
