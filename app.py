@@ -650,6 +650,7 @@ def check_db():
         pass
     # else send emails to users following a movie that releases today
     else:
+        print(releases)
         for release in releases:
             # date format
             date_obj = datetime.strptime(release.movie_date, '%Y-%m-%d')
