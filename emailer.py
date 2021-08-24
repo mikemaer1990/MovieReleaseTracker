@@ -9,9 +9,12 @@ from email.mime.multipart import MIMEMultipart
 def send_release_mail(recipients, date, subject, img_url, cast):
 
     # Set cast values for email template
-    castOne = cast[0]['name'] or 'N/A'
-    castTwo = cast[1]['name'] or 'N/A'
-
+    if type(cast) is list:
+        castOne = cast[0]['name'] or 'N/A'
+        castTwo = cast[1]['name'] or 'N/A'
+    else:
+        castOne = "Unknown"
+        castTwo = ""
     message = Mail(
         from_email = "MovieReleaseTracker@Gmail.com",
         to_emails = recipients,
