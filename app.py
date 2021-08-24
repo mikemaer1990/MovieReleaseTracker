@@ -852,11 +852,11 @@ def insert_follows(movie_id, theatre=None, digital=None):
         release_date_list = [
             {
                 'type': 'digital', 
-                'date': release_obj['digital']['small'] 
+                'date': str(release_obj['digital']['small'])
             }, 
             {
                 'type': 'theatrical', 
-                'date': release_obj['theatre']['small'] 
+                'date': str(release_obj['theatre']['small'])
             }
         ]
     # For digital releases only
