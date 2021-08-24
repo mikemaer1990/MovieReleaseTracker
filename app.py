@@ -664,7 +664,10 @@ def check_db():
             movie = lookupById(release.movie_id)
             movie_poster = movie[0]['cover']
             # Get the first two cast members to put in the email
-            movie_stars = movie[0]['cast'][0:2] or 'Unknown'
+            if movie[0]['cast'] != 'N/A':
+                movie_stars = movie[0]['cast'][0:2]
+            else:
+                movie_stars = 'Unknown'
             if movie_poster != 'https://image.tmdb.org/t/p/w600_and_h900_bestv2None':
                 movie_poster_url = movie_poster
             else:
